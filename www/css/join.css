@@ -1,0 +1,74 @@
+
+
+*{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 5vh;
+    text-align: center;
+    
+}
+
+h1{
+    font-size: auto;
+    padding: 2vh;
+    width: fit-content;
+    margin: 10px auto auto auto;
+    border: .3vh solid black;
+    border-radius: 1vh;
+    color: white;    
+}
+
+body{
+    margin: 0 0 0 0;
+    height: 100%;
+    width: 100%;
+    background-color: #172A3A;
+    overflow: hidden;
+}
+
+input{
+    width: 40vw;
+    height: fit-content;
+    padding: 1vh 1vh 1vh 1vh;
+    text-align: left;
+    border: 2px solid black;
+    border-radius: 3px;
+    margin-top: 4vh;
+    background-color: #C9DCB3;
+}
+
+button{
+    margin-top: 4vh;
+    width: 40vw;
+    height: fit-content;
+    padding: 0 0 0 0 ;
+    border: 2px solid black;
+    border-radius: 3px;
+    background-color: rgb(161, 161, 161);
+}
+
+button:hover{
+    background-color: rgb(185, 185, 185);
+}
+
+/* button:active{
+    margin-top: 32.5px;
+    margin-bottom: 2.5;
+    height: 95px;
+    width: 590px;
+} */
+
+#inputBackground{
+    margin: 0 auto 0 auto;
+    padding-top: 10vh;
+    height: 100%;
+    width: 50vw;
+    background-color: #74B3CE;
+    border-left: 4px solid white;
+    border-right: 4px solid white;
+}
+
+#input{
+    height: 100%;
+    margin: 10vh auto auto auto;
+    background-color: transparent;
+}
