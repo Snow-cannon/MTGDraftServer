@@ -20,33 +20,51 @@ exports.Game_Logic = class {
         this.tobj = table;
         this.state = WAITING;
 
-        this.num_users = 1;
+        this.num_users = 4;
         this.loaded = false;
         this.packs = undefined;
         this.pack_promise = createPacks(this.num_users);
         this.pack_promise.then((response) => {
-            this.loaded = true;
-            console.log('got hand');
             this.packs = response;
+            this.loaded = true;
             if (this.state === DRAFTING) {
+                this.reduce_num_packs();
                 this.send_hand_request();
             }
         });
     }
 
+    /**
+     * Sends a notification to all table users that they can get their cards
+     */
     send_hand_request(){
         this.tobj.notify_all('get_hand');
     }
 
+    /**
+     * Sets the draft state to Drafting and locks the table so no other users can join
+     */
     start_draft() {
         this.state = DRAFTING;
+        this.tobj.lock();
+        this.num_users = this.tobj.users.length;
+        if(this.loaded){
+            if(this.packs !== undefined){
+                this.reduce_num_packs();
+            }
+        }
+    }
+
+    reduce_num_packs(){
+        this.packs = this.packs.slice(0, this.num_users);
+        log('reduce_num_packs', 'deleting extras', { packs: this.packs.length });
     }
 
     /**
      * Gets quick data from the server
-     * @param {*} cmd 
+     * @param {String} cmd 
      * @param {*} msg 
-     * @param {*} uobj 
+     * @param {User} uobj 
      */
     ping(cmd, msg, uobj){
         switch(cmd){
@@ -64,9 +82,11 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'get_user_pack':
+                /**
+                 * Sends a pack to the user based on the users table_id
+                 */
                 if(this.loaded){
-                    // console.log(this.packs);
-                    return { ok: true, pack: this.packs[0] }
+                    return { ok: true, pack: this.packs[this.get_user_table_id(uobj)] }
                 } else {
                     return { ok: false }
                 }
@@ -84,6 +104,14 @@ exports.Game_Logic = class {
                 return undefined;
         }
 
+    }
+
+    /**
+     * Returns an ID that is referencing the users position in the table user array
+     * @param {User} uobj 
+     */
+    get_user_table_id(uobj){
+        return this.tobj.users.indexOf(uobj);
     }
 
 }

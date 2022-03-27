@@ -178,6 +178,10 @@ class Table {
         return this.game_state.state;
     }
 
+    lock(){
+        this.locked = true;
+    }
+
 }
 /**
  * Takes in the maximum number of users. adds to the table if the table is not full
