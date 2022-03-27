@@ -25,6 +25,8 @@ class Table {
         //Determins if no more users can join
         this.locked = false;
         this.host = undefined;
+
+        //TODO: Add separate game instance for each table
     }
 
     set_host() {
