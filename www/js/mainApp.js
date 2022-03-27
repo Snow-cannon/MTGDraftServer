@@ -105,5 +105,5 @@ const confirmButton = document.getElementById('confirm');
 confirmButton.addEventListener("click", () => {confirmSelection(cardDiv)});
 
 window.onload = () => {
-    userDeck = json.parse(ls.getItem('deck'));
+    userDeck = JSON.parse(ls.getItem('deck'));
 }
