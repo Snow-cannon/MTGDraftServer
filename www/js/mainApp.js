@@ -22,6 +22,7 @@ socket.emit('request_hand');
 
 let cardSelected;
 let cardSelectedIndex;
+let currPack = [];
 let userDeck = [];
 
 function clearSelectedCards(parent) {
@@ -36,6 +37,7 @@ function removeAllChildNodes(parent) {
 }
 
 function renderCards(pack, element, clickEvent) {
+    removeAllChildNodes(element);
     for (let i = 0; i < pack.length; ++i) {
         let card = pack[i]
         const cardImg = document.createElement("img");
@@ -58,7 +60,6 @@ function renderCards(pack, element, clickEvent) {
 }
 
 async function getPackFromServer() {
-
     let name = '__request';
     let data = {
         command: 'game_request',
@@ -79,36 +80,58 @@ async function getPackFromServer() {
     if (response.ok) {
         let responseJSON = await response.json();
         if(responseJSON.ok){
-            renderCards(responseJSON.pack, cardDiv, true);
+            currPack = responseJSON.pack;
+            renderCards(currPack, cardDiv, true);
         }
     }
+}
+
+async function sendPackToServer(pack) {
+    let name = '__request';
+    let data = {
+        command: 'game_request',
+        game: {
+            request: 'update_user_pack',
+            params: {pack}
+        }
+    };
+
+    let strdat = JSON.stringify(data);
+
+    let response = await fetch(name, {
+        method: "post",
+        body: strdat,
+        headers: { 'Content-Type': 'application/json' }
+    });
 }
 
 
 function confirmSelection(element){
     if(cardSelected !== undefined){
-        addToDeck(cardSelected); 
+        addToDeck(cardSelected);
         currPack.splice(cardSelectedIndex, 1);
-        removeAllChildNodes(element); 
         renderCards(currPack, element, true);
         cardSelected = undefined;
+        sendPackToServer(currPack);
     }
 }
 
 function addToDeck(card){
     userDeck.push(card);
-    renderCards([card], deckDiv, false);
+    renderCards(userDeck, deckDiv, false);
     ls.setItem('deck', json.stringify(userDeck));
+    renderCards(currPack, cardDiv, true);
 }
 
 const confirmButton = document.getElementById('confirm');
 confirmButton.addEventListener("click", () => {confirmSelection(cardDiv)});
 
 window.onload = () => {
-    if(JSON.parse(ls.getItem('deck') === undefined){
+    if(JSON.parse(ls.getItem('deck') === undefined)){
         userDeck = [];
     }
     else{
         userDeck = JSON.parse(ls.getItem('deck'));
     }
+    renderCards(userDeck, deckDiv, false);
 }
