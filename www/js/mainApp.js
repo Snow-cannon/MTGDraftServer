@@ -98,7 +98,7 @@ function confirmSelection(element){
 function addToDeck(card){
     userDeck.push(card);
     renderCards([card], deckDiv, false);
-    ls.setItem('deck') = json.stringify(userDeck);
+    ls.setItem('deck', json.stringify(userDeck));
 }
 
 const confirmButton = document.getElementById('confirm');
