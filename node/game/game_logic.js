@@ -1,5 +1,6 @@
 "use strict"
 
+const { response } = require('express');
 const { log, log_in, statement, set_logger_theme, set_max_height, set_max_depth } = require('../logger.js');
 const { createPacks } = require('./pack_control.js');
 const WAITING = 'waiting',
@@ -20,11 +21,13 @@ exports.Game_Logic = class {
         this.state = WAITING;
 
         this.num_users = 1;
-        this.packs = createPacks(this.num_users);
         this.loaded = false;
-        this.packs.then((response) => {
+        this.packs = undefined;
+        this.pack_promise = createPacks(this.num_users);
+        this.pack_promise.then((response) => {
             this.loaded = true;
             console.log('got hand');
+            this.packs = response;
             if (this.state === DRAFTING) {
                 this.send_hand_request();
             }
@@ -61,8 +64,12 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'get_user_pack':
-
-
+                if(this.loaded){
+                    // console.log(this.packs);
+                    return { ok: true, pack: this.packs[0] }
+                } else {
+                    return { ok: false }
+                }
             case 'get_state':
                 return { state: this.state };
 

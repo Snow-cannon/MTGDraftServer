@@ -12,7 +12,6 @@ socket.on('make_host', function (data) {
 });
 
 socket.on('get_hand', function (data) {
-    console.log('get hand pls');
     getPackFromServer();
 });
 
@@ -24,22 +23,22 @@ let cardSelected;
 let cardSelectedIndex;
 
 function clearSelectedCards(parent) {
-    for(const child of parent.children) {
+    for (const child of parent.children) {
         child.classList.remove("selected");
     }
 }
 
-function renderCards(pack, element, clickEvent){
-    for(let i = 0; i < pack.length; ++i){
+function renderCards(pack, element, clickEvent) {
+    for (let i = 0; i < pack.length; ++i) {
         let card = pack[i]
         const cardImg = document.createElement("img");
         cardImg.classList.add("card");
         cardImg.src = card.img;
-        if(card.back !== ""){
-            cardImg.addEventListener("mouseover", () => {cardImg.src = card.back});
-            cardImg.addEventListener("mouseout", () => {cardImg.src = card.img});
+        if (card.back !== "") {
+            cardImg.addEventListener("mouseover", () => { cardImg.src = card.back });
+            cardImg.addEventListener("mouseout", () => { cardImg.src = card.img });
         }
-        if(clickEvent){
+        if (clickEvent) {
             cardImg.addEventListener("mouseup", () => {
                 cardSelected = card;
                 cardSelectedIndex = i;
@@ -52,7 +51,8 @@ function renderCards(pack, element, clickEvent){
     }
 }
 
-async function getPackFromServer(){
+async function getPackFromServer() {
+
     let name = '__request';
     let data = {
         command: 'game_request',
@@ -70,7 +70,7 @@ async function getPackFromServer(){
         headers: { 'Content-Type': 'application/json' }
     });
 
-    if(response.ok){
+    if (response.ok) {
         let responseJSON = await response.json();
         if(responseJSON.ok){
             renderCards(responseJSON.pack, cardDiv, true);
