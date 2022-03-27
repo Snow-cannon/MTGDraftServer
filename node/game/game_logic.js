@@ -20,7 +20,7 @@ exports.Game_Logic = class {
         this.tobj = table;
         this.state = WAITING;
 
-        this.num_users = 4;
+        this.num_users = 2;
         this.loaded = false;
         this.packs = undefined;
         this.pack_promise = createPacks(this.num_users);
@@ -82,7 +82,8 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'update_user_pack':
-                
+                console.log(data);
+                return { data };
 
             case 'get_user_pack':
                 /**
