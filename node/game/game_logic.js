@@ -81,6 +81,9 @@ exports.Game_Logic = class {
      */
     make_request(request, data, uobj) {
         switch (request) {
+            case 'update_user_pack':
+                
+
             case 'get_user_pack':
                 /**
                  * Sends a pack to the user based on the users table_id
