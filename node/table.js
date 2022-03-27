@@ -143,6 +143,19 @@ class Table {
     }
 
     /**
+     * Notifies every user in the table
+     * @param {String} cmd 
+     * @param {any} msg 
+     */
+    notify_all(cmd, message){
+        this.users.map(uobj => {
+            if (uobj.socket !== null) {
+                uobj.notify_self(cmd, message);
+            }
+        });
+    }
+
+    /**
      * Returns if the user id exists within the table
      * @param {Integer} user_id 
      * @returns 

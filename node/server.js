@@ -146,7 +146,7 @@ app.get('/', (req, res) => {
                 req.session.user_id = user_id;
                 req.session.table_id = table_id;
 
-                if(tables.get_table(table_id).get_game_state() === 'drafting'){
+                if (tables.get_table(table_id).get_game_state() === 'drafting') {
                     var pp = path.join(www_root(), 'html', 'draft_view.html');
                 }
             }
@@ -499,6 +499,19 @@ io.use(function (socket, next) {
 
 io.on('connection', function (socket) {
 
+    //Assign the socket to the user if the user exists
+    if (users.exists(socket.request.session.user_id)) {
+        let uobj = users.get_user(socket.request.session.user_id);
+        uobj.set_socket(socket);
+        uobj.activate();
+        uobj.notify_table('log', uobj.display_name + ' joined');
+        let tobj = uobj.get_table();
+        if (tobj !== undefined && tobj.host === undefined) {
+            tobj.set_host();
+        }
+        log_in('SOCKET', 'set_socket', 'User ID', { userID: uobj.id }, { display_name: uobj.display_name });
+    }
+
     /**
      * Validates that the socket is connected to a user. If the User
      * does exist it calls the callback function. Otherwise it forces
@@ -516,19 +529,6 @@ io.on('connection', function (socket) {
         }
     }
 
-    //Assign the socket to the user if the user exists
-    if (users.exists(socket.request.session.user_id)) {
-        let uobj = users.get_user(socket.request.session.user_id);
-        uobj.set_socket(socket);
-        uobj.activate();
-        uobj.notify_table('log', uobj.display_name + ' joined');
-        let tobj = uobj.get_table();
-        if(tobj !== undefined && tobj.host === undefined){
-            tobj.set_host();
-        }
-        log_in('SOCKET', 'set_socket', 'User ID', { userID: uobj.id }, { display_name: uobj.display_name });
-    }
-
     socket.on('bleep', function (e) {
         validate_callback(socket, (socket, uobj) => {
             uobj.notify_table('log', 'Bleep!');
@@ -539,19 +539,25 @@ io.on('connection', function (socket) {
         validate_callback(socket, (socket, uobj) => {
             uobj.deactivate();
             let tobj = uobj.get_table();
-            if(tobj !== undefined){
+            if (tobj !== undefined) {
                 tobj.set_host();
             }
             uobj.notify_table('log', 'User ' + users.get_user(uobj.id).display_name + ' disconnected');
         });
     });
 
-    socket.on('am_host', function (data) {
+    socket.on('am_host', function (e) {
         validate_callback(socket, (socket, uobj) => {
-            if(uobj.is_host){
+            if (uobj.is_host) {
                 socket.emit('make_host');
             }
         });
+    });
+
+    socket.on('request_hand', function (e) {
+        validate_callback(socket, (socket, uobj) => {
+            uobj.ping_table('request_hand', undefined, uobj);
+        })
     });
 
 });

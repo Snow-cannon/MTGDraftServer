@@ -19,7 +19,7 @@ async function getCard(uri) {
     const response = await fetch(uri);
     if (response.ok) {
         const responseJSON = await response.json();
-        console.log(responseJSON);
+        // console.log(responseJSON);
         let cardName = responseJSON.name;
         let img_url = "";
         let card_back = "";

@@ -108,6 +108,13 @@ class User {
         return tables.get_table(this.table_id);
     }
 
+    /**
+     * Returns the users game_state
+     */
+    ping_table(cmd, msg, uobj){
+        return this.get_table().game_state.ping(cmd, msg, uobj);
+    }
+
 }
 
 /**

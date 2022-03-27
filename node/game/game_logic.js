@@ -19,14 +19,31 @@ exports.Game_Logic = class {
         this.tobj = table;
         this.state = WAITING;
 
-        this.num_users = 4;
+        this.num_users = 1;
         this.packs = createPacks(this.num_users);
-
-        console.log(this.packs);
+        this.loaded = false;
+        this.packs.then((response) => {
+            this.loaded = true;
+            console.log('got hand');
+            if (this.state === DRAFTING) {
+                this.send_hand_request();
+            }
+        });
     }
 
-    start_draft(){
+    send_hand_request(){
+        this.tobj.notify_all('get_hand');
+    }
+
+    start_draft() {
         this.state = DRAFTING;
+    }
+
+    ping(cmd, msg, uobj){
+        switch(cmd){
+            case 'request_hand':
+                uobj.socket.emit('get_hand');
+        }
     }
 
     /**
@@ -43,8 +60,8 @@ exports.Game_Logic = class {
             //Sets the game state to the drafting mode
             case 'start_game':
                 this.start_draft(); //Change the state
-                uobj.notify_table('reload'); //Notify the table to reload
                 uobj.notify_self('reload'); //Notify the user sending the request to reload
+                uobj.notify_table('reload'); //Notify the table to reload
                 return { state: this.state }; //Return the new game state
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
