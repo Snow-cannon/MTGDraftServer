@@ -1,6 +1,7 @@
 "use strict"
 
 const { log, log_in, statement, set_logger_theme, set_max_height, set_max_depth } = require('../logger.js');
+const { createPacks } = require('./pack_control.js');
 const WAITING = 'waiting',
     DRAFTING = 'drafting';
 
@@ -14,8 +15,14 @@ exports.Game_Logic = class {
      * @param {Table} table 
      */
     constructor(table) {
+        //Basic game data
         this.tobj = table;
         this.state = WAITING;
+
+        this.num_users = 4;
+        this.packs = createPacks(this.num_users);
+
+        console.log(this.packs);
     }
 
     start_draft(){

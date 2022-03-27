@@ -4,13 +4,8 @@
 
 const { log, log_in, statement, set_logger_theme, set_max_height, set_max_depth } = require('./logger.js');
 
-
-
 set_max_depth(4);
 set_max_height(100);
-log('test', 'test', { test: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0] });
-
-
 
 const express = require('express');
 const app = express();
