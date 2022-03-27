@@ -17,11 +17,13 @@ let user_name = cookie.getCookie('user_name');
 
 let bleep_button = document.getElementById('bleep');
 let bail_button = document.getElementById('bail');
-let get_names_button = document.getElementById('get_names');
+let start_button = document.getElementById('start');
+
+start_button.style.display = 'none';
 
 bleep_button.onclick = () => socket.emit('bleep');
 bail_button.onclick = leave_table;
-get_names_button.onclick = request_usernames;
+start_button.onclick = start_game;
 
 table_id_display.innerText = 'table: ' + table_id;
 user_id_display.innerText = 'user: ' + user_id;
@@ -37,10 +39,18 @@ socket.on('reload', function (data) {
     location.reload();
 });
 
+socket.on('make_host', function (data) {
+    start_button.style.display = 'inline';
+});
+
+socket.on('revoke_host', function (data) {
+    start_button.style.display = 'none';
+});
+
+socket.emit('am_host');
+
 
 function leave_table() {
-
-    logger.log('leave_table', 'Requesting to leave table');
 
     let name = '__request';
     let data = {
@@ -76,16 +86,14 @@ function leave_table() {
 
 }
 
-function request_usernames(){
-
-    logger.log('request_usernames', 'Requesting names of other users');
+function start_game() {
 
     let name = '__request';
     let data = {
         command: 'game_request',
         game: {
-            request: 'get_usernames',
-            params: { test: 'test_parameter' }
+            request: 'start_game',
+            params: {}
         }
     };
 
@@ -104,6 +112,6 @@ function request_usernames(){
             return res;
         })
         .then(function (data) {
-            console.log(data);
+ 
         });
 }

@@ -39,8 +39,16 @@ class Table {
      * Changes which user is the host of the table
      */
     set_host() {
+        this.users.map(uobj => { uobj.is_host = false; });
         this.host = this.users.find(uobj => !uobj.inactive);
-        log('set_host', 'Host', { table: this.id }, { host: this.host });
+        if (this.host !== undefined && this.host !== null) {
+            this.host.is_host = true;
+            if (this.host.socket !== null) {
+                this.host.socket.emit('make_host');
+            }
+            // console.log(this.host);
+            // this.host.notify_table('revoke_host', 'none');
+        }
     }
 
     /**
@@ -73,6 +81,7 @@ class Table {
             //Set the user to be no longer in the table
             uobj.leave_table();
             this.set_host();
+            console.log(this);
 
             log('remove_user', 'User left table', { user: user_id }, { table: this.id });
         } else {
@@ -128,7 +137,7 @@ class Table {
     notify(cmd, message, sender) {
         this.users.map(uobj => {
             if (uobj.id !== sender.id && sender !== null && uobj.socket !== null) {
-                uobj.socket.emit(cmd, message);
+                uobj.notify_self(cmd, message);
             }
         });
     }
@@ -148,8 +157,12 @@ class Table {
      * @param {Object} params 
      * @returns 
      */
-    game_request(request, params, user_id) {
-        return this.game_state.make_request(request, params, user_id);
+    game_request(request, params, uobj) {
+        return this.game_state.make_request(request, params, uobj);
+    }
+
+    get_game_state() {
+        return this.game_state.state;
     }
 
 }

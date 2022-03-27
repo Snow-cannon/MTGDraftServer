@@ -5,6 +5,7 @@ var userCount = 0;
 
 const tables = require('./table.js');
 const { log } = require('./logger.js');
+const { User_Data } = require('./game/user_data.js');
 
 //User object
 class User {
@@ -16,9 +17,9 @@ class User {
         this.inactive = false;
         this.display_name = '';
 
-
-
         this.socket = null;
+
+        this.data = new User_Data({});
     }
 
 
@@ -42,7 +43,11 @@ class User {
     }
 
     activate() {
-        this.inactive = true;
+        this.inactive = false;
+    }
+
+    has_socket(){
+        return this.socket !== undefined && this.socket !== null;
     }
 
     /**
@@ -57,6 +62,12 @@ class User {
             tobj.notify(cmd, message, this);
         } else {
             log('notify_table', 'table does not exist', { table: this.table_id });
+        }
+    }
+
+    notify_self(cmd, msg){
+        if(this.has_socket()){
+            this.socket.emit(cmd, msg);
         }
     }
 

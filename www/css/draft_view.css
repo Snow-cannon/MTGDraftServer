@@ -1,0 +1,17 @@
+body {
+    background-color: blanchedalmond;
+}
+
+div {
+    margin: 2px;
+    border: 3px black solid;
+}
+
+h1 {
+    text-align: center;
+}
+
+.card {
+    width: 100px;
+    height: auto;
+}

@@ -87,7 +87,7 @@ function js_root() {
 app.get('/', (req, res) => {
 
     //Set the main game path
-    var pp = path.join(www_root(), 'html', 'room_view.html');
+    var pp = path.join(www_root(), 'html', 'wait_room.html');
 
     //Create cookie reset functions
 
@@ -145,8 +145,15 @@ app.get('/', (req, res) => {
                 resetUserCookie();
                 resetTableCookie();
             } else {
+                /**
+                 * This is when the user exists and is in a table
+                 */
                 req.session.user_id = user_id;
                 req.session.table_id = table_id;
+
+                if(tables.get_table(table_id).get_game_state() === 'drafting'){
+                    var pp = path.join(www_root(), 'html', 'draft_view.html');
+                }
             }
         }
     }
@@ -450,7 +457,7 @@ app.post('/__request', (req, res) => {
                         if (game_data.hasOwnProperty('request') && game_data.hasOwnProperty('params')) {
 
                             //Send the request to the users table
-                            return_val = tobj.game_request(game_data.request, game_data.params, user_id);
+                            return_val = tobj.game_request(game_data.request, game_data.params, uobj);
 
                             //Check that data was returned
                             if (return_val !== undefined) {
@@ -520,6 +527,10 @@ io.on('connection', function (socket) {
         uobj.set_socket(socket);
         uobj.activate();
         uobj.notify_table('log', uobj.display_name + ' joined');
+        let tobj = uobj.get_table();
+        if(tobj !== undefined && tobj.host === undefined){
+            tobj.set_host();
+        }
         log_in('SOCKET', 'set_socket', 'User ID', { userID: uobj.id }, { display_name: uobj.display_name });
     }
 
@@ -532,7 +543,19 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function (e) {
         validate_callback(socket, (socket, uobj) => {
             uobj.deactivate();
+            let tobj = uobj.get_table();
+            if(tobj !== undefined){
+                tobj.set_host();
+            }
             uobj.notify_table('log', 'User ' + users.get_user(uobj.id).display_name + ' disconnected');
+        });
+    });
+
+    socket.on('am_host', function (data) {
+        validate_callback(socket, (socket, uobj) => {
+            if(uobj.is_host){
+                socket.emit('make_host');
+            }
         });
     });
 
