@@ -6,6 +6,7 @@ import { Logger } from './logger.js';
 const socket = io();
 const cardDiv = document.getElementById('pack_holder');
 const deckDiv = document.getElementById('deck_holder');
+const ls = window.localStorage;
 
 socket.on('make_host', function (data) {
     console.log('You are host!');
@@ -21,10 +22,16 @@ socket.emit('request_hand');
 
 let cardSelected;
 let cardSelectedIndex;
+let userDeck = [];
 
 function clearSelectedCards(parent) {
     for (const child of parent.children) {
         child.classList.remove("selected");
+    }
+}
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
     }
 }
 
@@ -44,7 +51,6 @@ function renderCards(pack, element, clickEvent) {
                 cardSelectedIndex = i;
                 clearSelectedCards(element)
                 cardImg.classList.add("selected")
-                console.log(packArr);
             });
         }
         element.appendChild(cardImg);
@@ -76,4 +82,28 @@ async function getPackFromServer() {
             renderCards(responseJSON.pack, cardDiv, true);
         }
     }
+}
+
+
+function confirmSelection(element){
+    if(cardSelected !== undefined){
+        addToDeck(cardSelected); 
+        currPack.splice(cardSelectedIndex, 1);
+        removeAllChildNodes(element); 
+        renderCards(currPack, element, true);
+        cardSelected = undefined;
+    }
+}
+
+function addToDeck(card){
+    userDeck.push(card);
+    renderCards([card], deckDiv, false);
+    ls.setItem('deck') = json.stringify(userDeck);
+}
+
+const confirmButton = document.getElementById('confirm');
+confirmButton.addEventListener("click", () => {confirmSelection(cardDiv)});
+
+window.onload = () => {
+    userDeck = json.parse(ls.getItem('deck'));
 }
