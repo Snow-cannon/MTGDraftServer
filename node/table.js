@@ -2,6 +2,7 @@
 
 const users = require('./user.js');
 const { log } = require('./logger.js');
+const { Game_Logic } = require('./game/game_logic.js');
 
 var TABLES = [];
 var tableCount = 0;
@@ -13,6 +14,11 @@ exports.get_table_arr = function () {
 //A table object
 class Table {
 
+    /**
+     * Takes in an id and a maximum number iof users
+     * @param {Integer} table_id 
+     * @param {Integer} max_size 
+     */
     constructor(table_id, max_size) {
         this.id = table_id;
         this.users = [];
@@ -26,15 +32,21 @@ class Table {
         this.locked = false;
         this.host = undefined;
 
-        //TODO: Add separate game instance for each table
+        this.game_state = new Game_Logic(this);
     }
 
+    /**
+     * Changes which user is the host of the table
+     */
     set_host() {
         this.host = this.users.find(uobj => !uobj.inactive);
         log('set_host', 'Host', { table: this.id }, { host: this.host });
     }
 
-    //Removes a user from the table
+    /**
+     * Removes a user from the table
+     * @param {Integer} user_id 
+     */
     remove_user(user_id) {
         //Find the user with the given ID in the table
         let uobj = this.users.find(u => { return u.id === user_id; });
@@ -68,6 +80,11 @@ class Table {
         }
     }
 
+    /**
+     * Attempts to add a user to the table. Returns true if successful, false otherwise
+     * @param {Integer} user_id 
+     * @returns {boolean}
+     */
     add_user(user_id) {
         if (!this.locked && this.users.length < this.user_limit) {
             let uobj = users.get_user(user_id);
@@ -102,7 +119,12 @@ class Table {
         }
     }
 
-
+    /**
+     * Sends a message to the users within the table except for the sender
+     * @param {String} cmd 
+     * @param {any} message 
+     * @param {uobj} sender 
+     */
     notify(cmd, message, sender) {
         this.users.map(uobj => {
             if (uobj.id !== sender.id && sender !== null && uobj.socket !== null) {
@@ -111,13 +133,31 @@ class Table {
         });
     }
 
-
+    /**
+     * Returns if the user id exists within the table
+     * @param {Integer} user_id 
+     * @returns 
+     */
     has_user(user_id) {
         return this.users.find(uobj => uobj.id === user_id) !== undefined;
     }
 
+    /**
+     * Takes in a request name and a set of parameters and returns the result from game logic
+     * @param {String} request 
+     * @param {Object} params 
+     * @returns 
+     */
+    game_request(request, params, user_id) {
+        return this.game_state.make_request(request, params, user_id);
+    }
+
 }
-//Makes a new table with a unique ID
+/**
+ * Takes in the maximum number of users. adds to the table if the table is not full
+ * @param {Integer} max_size 
+ * @returns 
+ */
 exports.create_table = function (max_size) {
     //Creates a table with an ID equal to the number of tables created
     let tobj = new Table(tableCount++, max_size);
@@ -126,7 +166,12 @@ exports.create_table = function (max_size) {
     //Returns the object for reference
     return tobj;
 }
-//Returns the table object with the specified ID
+
+/**
+ * Returns a table object if the table with the given id exists. returns undefined otherwise
+ * @param {Integer} table_id 
+ * @returns {Table|undefined}
+ */
 exports.get_table = function (table_id) {
     if (table_id !== -1) {
         return TABLES.find(x => { if (table_id === x.id) { return x; } });;
@@ -135,12 +180,20 @@ exports.get_table = function (table_id) {
     }
 }
 
+/**
+ * Returns true if the table with the given id exists
+ * @param {id} table_id 
+ * @returns {boolean}
+ */
 exports.exists = function (table_id) {
     if (table_id === -1) { return false; }
     return TABLES.filter(tobj => { return tobj.id === table_id }).length > 0;
 }
 
-//Removes user from the table they are currently in
+/**
+ * Removes a user from it's table if the user is in a table already
+ * @param {Integer} user_id 
+ */
 exports.leave_table = function (user_id) {
     //Get the user object
     let uobj = users.get_user(user_id);
@@ -170,7 +223,13 @@ exports.leave_table = function (user_id) {
     }
 }
 
-//Adds a user to the detrmined table and removes it from the table it was previously in
+/**
+ * Tries to add a user with the given user_id to the table with the given table_id.
+ * Returns true if successful
+ * @param {Integer} user_id 
+ * @param {Integer} table_id 
+ * @returns {boolean}
+ */
 exports.join_table = function (user_id, table_id) {
     //Get related objects
     let uobj = users.get_user(user_id);
@@ -206,6 +265,11 @@ exports.join_table = function (user_id, table_id) {
     }
 }
 
+/**
+ * Removes a table object from the array and returns the removed object. Returns undefined if the table does not exist
+ * @param {Integer} table_id 
+ * @returns {Table|undefined}
+ */
 function delete_table(table_id) {
     //Get the index of the table with the given ID
     let index = TABLES.indexOf(exports.get_table(table_id));

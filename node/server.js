@@ -323,6 +323,7 @@ const debug = false;
 app.post('/__request', (req, res) => {
     var data = req.body;
 
+    //Define variables
     var cmd = data.command;
     let user_id = parseInt(req.cookies.user_id);
     let table_id = parseInt(req.cookies.table_id);
@@ -430,11 +431,44 @@ app.post('/__request', (req, res) => {
             res.write(JSON.stringify(return_val));
             return res.end("");
 
+        case 'game_request':
+            //Get the user and table object associated with the request
+            uobj = users.get_user(user_id);
+
+            //Check if user exists
+            if (uobj !== undefined) {
+                tobj = uobj.get_table();
+
+                //Check if table exists
+                if (tobj !== undefined) {
+
+                    //Get the game_request data
+                    if (data.hasOwnProperty('game')) {
+                        let game_data = data.game;
+
+                        //Check for valid data
+                        if (game_data.hasOwnProperty('request') && game_data.hasOwnProperty('params')) {
+
+                            //Send the request to the users table
+                            return_val = tobj.game_request(game_data.request, game_data.params, user_id);
+
+                            //Check that data was returned
+                            if (return_val !== undefined) {
+                                res.writeHead(200, { 'Content-Type': 'text/html' });
+                                res.write(JSON.stringify(return_val));
+                                return res.end("");
+                            }
+                        }
+                    }
+                }
+            } //If there is no user, table, valid input data, or valid return request, say it is an invalid post request
         default:
             log('POST', 'Unknown command request', { cmd: cmd });
+
+            return_val = { error: 'Bad post request' };
             res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.write("Bad post data for request.");
-            return res.end("What?");
+            res.write(JSON.stringify(return_val));
+            return res.end("");
     };
 
 });

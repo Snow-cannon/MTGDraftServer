@@ -76,6 +76,10 @@ class User {
         this.display_name = name;
     }
 
+    /**
+     * Returns true if the table the user says it is in actually contains the user
+     * @returns {boolean}
+     */
     user_table_match() {
         let tobj = tables.get_table(this.table_id);
         if (tobj !== undefined) {
@@ -85,13 +89,21 @@ class User {
         }
     }
 
-    get_table(){
+    /**
+     * Returns the table object the user is in
+     * @returns {Table}
+     */
+    get_table() {
         return tables.get_table(this.table_id);
     }
 
 }
 
-
+/**
+ * Returns true if the table the user says it is in actually contains the user
+ * @param {Integer} user_id 
+ * @returns {boolean}
+ */
 exports.user_table_match = function (user_id) {
     let uobj = exports.get_user(user_id);
     if (uobj !== undefined) {
@@ -116,8 +128,11 @@ exports.add_user = function (name) {
     return uobj;
 }
 
-
-//Return the user object based on ID if it exists
+/**
+ * Returns the user object with the given id. Returns undefined if it does not exist
+ * @param {Integer} user_id 
+ * @returns {User|undefined}
+ */
 exports.get_user = function (user_id) {
     if (user_id !== -1) {
         return USERS.find(uobj => {
@@ -128,7 +143,11 @@ exports.get_user = function (user_id) {
     }
 }
 
-//Return true if the object exists
+/**
+ * Returns true if the user object exists. Returns false otherwise
+ * @param {Integer} user_id 
+ * @returns {boolean}
+ */
 exports.exists = function (user_id) {
     if (user_id !== -1) {
         return USERS.find(uobj => { return uobj.id == user_id; }) != undefined;
@@ -137,7 +156,10 @@ exports.exists = function (user_id) {
     }
 }
 
-
+/**
+ * Returns the entire arrau of users
+ * @returns {User[]}
+ */
 exports.get_user_arr = function () {
     return USERS;
 }
