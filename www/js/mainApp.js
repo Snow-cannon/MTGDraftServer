@@ -92,7 +92,7 @@ async function sendPackToServer(pack) {
         command: 'game_request',
         game: {
             request: 'update_user_pack',
-            params: {pack}
+            params: {pack: currPack}
         }
     };
 
@@ -127,11 +127,11 @@ const confirmButton = document.getElementById('confirm');
 confirmButton.addEventListener("click", () => {confirmSelection(cardDiv)});
 
 window.onload = () => {
-    if(JSON.parse(ls.getItem('deck') === undefined)){
+    if(JSON.parse(ls.getItem('deck') === null)){
         userDeck = [];
     }
     else{
         userDeck = JSON.parse(ls.getItem('deck'));
+        renderCards(userDeck, deckDiv, false);
     }
-    renderCards(userDeck, deckDiv, false);
 }
