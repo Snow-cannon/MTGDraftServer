@@ -39,6 +39,12 @@ exports.Game_Logic = class {
         this.state = DRAFTING;
     }
 
+    /**
+     * Gets quick data from the server
+     * @param {*} cmd 
+     * @param {*} msg 
+     * @param {*} uobj 
+     */
     ping(cmd, msg, uobj){
         switch(cmd){
             case 'request_hand':
@@ -54,6 +60,9 @@ exports.Game_Logic = class {
      */
     make_request(request, data, uobj) {
         switch (request) {
+            case 'get_user_pack':
+
+
             case 'get_state':
                 return { state: this.state };
 
