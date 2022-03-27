@@ -3,7 +3,7 @@
 const fetch = require("node-fetch-commonjs");
 
 /**
- * 
+ * Creates n draft packs
  * @param {Integer} n Number of packs to be created
  * @returns {[][]Object<name, img, back, color>}
  */
@@ -15,6 +15,11 @@ exports.createPacks = async function (n) {
     return packArr;
 }
 
+/**
+ * Gets a card from the Scryfall api based on the give uri
+ * @param {String} uri 
+ * @returns {Object<name, img, back, color>}
+ */
 async function getCard(uri) {
     const response = await fetch(uri);
     if (response.ok) {
@@ -44,8 +49,9 @@ async function getCard(uri) {
     }
 }
 
-function colorCheck(colorConsistency, colorIdentity) {
-    if (colorIdentity.length > 1) {
+
+function colorCheck(colorConsistency, colorIdentity){
+    if (colorIdentity.length > 1){
         colorConsistency.M++;
     }
     else if (colorIdentity.length == 1) {
@@ -92,8 +98,5 @@ async function getPack() {
         curElem++;
     }
 
-    //for(let i = 0; i < 15; ++i){
-    //    pack.push(await getCard("https://api.scryfall.com/cards/random?q=usd%3E%3D10+t%3Aland"));
-    //}
     return pack;
 }
