@@ -21,3 +21,19 @@ h1 {
     padding: 0;
     border: 2px solid blue;
 }
+
+#blackout {
+    width: 100%;
+    height: 100%;
+    /* make sure you have set parents to a height of 100% too*/
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    background-color: gray;
+    opacity: 50%;
+    font-size: 1400%;
+    padding-top: 20%;
+    text-align: center;
+        /*just to make sure its on top*/
+}

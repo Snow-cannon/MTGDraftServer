@@ -6,6 +6,8 @@ import { Logger } from './logger.js';
 const socket = io();
 const cardDiv = document.getElementById('pack_holder');
 const deckDiv = document.getElementById('deck_holder');
+const confirmButton = document.getElementById('confirm');
+const greyOut = document.getElementById('blackout');
 const ls = window.localStorage;
 
 socket.on('make_host', function (data) {
@@ -84,11 +86,13 @@ async function getPackFromServer() {
             currPack = responseJSON.pack.cards;
             packID = responseJSON.pack.id;
             renderCards(currPack, cardDiv, true);
+            enablePlay();
         }
     }
 }
 
 async function sendPackToServer(pack) {
+    disablePlay();
     let name = '__request';
     let data = {
         command: 'game_request',
@@ -116,6 +120,7 @@ function confirmSelection(element){
         cardSelected = undefined;
         sendPackToServer(currPack);
     }
+    disablePlay();
 }
 
 function addToDeck(card){
@@ -125,7 +130,16 @@ function addToDeck(card){
     renderCards(currPack, cardDiv, true);
 }
 
-const confirmButton = document.getElementById('confirm');
+function disablePlay(){
+    confirmButton.disabled = true;
+    greyOut.style.display = 'block';
+}
+
+function enablePlay(){
+    confirmButton.disabled = false;
+    greyOut.style.display = 'none';
+}
+
 confirmButton.addEventListener("click", () => {confirmSelection(cardDiv)});
 
 window.onload = () => {
