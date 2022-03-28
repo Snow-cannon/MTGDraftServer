@@ -87,10 +87,12 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'update_user_pack':
-                let pack = data.pack;
-                let id = pack.id - this.pack_count;
-                console.log(pack);
-                this.packs[id] = pack.cards;
+                this.packs[data.pack.id - this.pack_count] = data.pack.cards;
+                this.returned++;
+                if(this.returned === this.num_users){
+                    this.pack_count = (this.pack_count + 1) % this.num_users;
+                    notify_all('get_hand');
+                }
                 return { ok: true };
 
             case 'get_user_pack':
@@ -104,17 +106,17 @@ exports.Game_Logic = class {
                     return { ok: false }
                 }
             case 'get_state':
-                return { state: this.state };
+                return { ok: true, state: this.state };
 
             //Sets the game state to the drafting mode
             case 'start_game':
                 this.start_draft(); //Change the state
                 uobj.notify_self('reload'); //Notify the user sending the request to reload
                 uobj.notify_table('reload'); //Notify the table to reload
-                return { state: this.state }; //Return the new game state
+                return { ok: true, state: this.state }; //Return the new game state
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
-                return undefined;
+                return { ok: false };
         }
 
     }
