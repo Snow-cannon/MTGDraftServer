@@ -121,8 +121,8 @@ function confirmSelection(element){
         renderCards(currPack, element, true);
         cardSelected = undefined;
         sendPackToServer(currPack);
+        disablePlay();
     }
-    disablePlay();
 }
 
 function addToDeck(card){
