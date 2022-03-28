@@ -119,7 +119,7 @@ function confirmSelection(element){
 function addToDeck(card){
     userDeck.push(card);
     renderCards(userDeck, deckDiv, false);
-    ls.setItem('deck', json.stringify(userDeck));
+    ls.setItem('deck', JSON.stringify(userDeck));
     renderCards(currPack, cardDiv, true);
 }
 
