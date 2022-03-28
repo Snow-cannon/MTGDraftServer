@@ -24,7 +24,7 @@ let cardSelected;
 let cardSelectedIndex;
 let currPack = [];
 let userDeck = [];
-let currID;
+let packID;
 
 function clearSelectedCards(parent) {
     for (const child of parent.children) {
@@ -82,7 +82,7 @@ async function getPackFromServer() {
         let responseJSON = await response.json();
         if(responseJSON.ok){
             currPack = responseJSON.pack.cards;
-            currID = responseJSON.pack.id;
+            packID = responseJSON.pack.id;
             renderCards(currPack, cardDiv, true);
         }
     }
