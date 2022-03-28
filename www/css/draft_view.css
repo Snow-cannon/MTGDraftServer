@@ -30,8 +30,7 @@ h1 {
     left: 0;
     top: 0;
     z-index: 10;
-    background-color: gray;
-    opacity: rgba(0, 0, 0, 0.5);
+    background-color: rgba(211, 211, 211, .7);
     font-size: 1200%;
     padding-top: 20%;
     text-align: center;
