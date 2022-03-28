@@ -60,7 +60,7 @@ function colorCheck(colorConsistency, colorIdentity){
     return colorConsistency;
 }
 
-async function getPack() {
+exports.getPack = async function () {
     let pack = [];
     let colorConsistency = { W: 0, U: 0, B: 0, R: 0, G: 0, M: 0 };
     let curElem = 0;

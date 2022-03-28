@@ -15,6 +15,7 @@ socket.on('make_host', function (data) {
 });
 
 socket.on('get_hand', function (data) {
+    console.log('hand requested');
     getPackFromServer();
 });
 
@@ -82,6 +83,7 @@ async function getPackFromServer() {
 
     if (response.ok) {
         let responseJSON = await response.json();
+        console.log(responseJSON);
         if(responseJSON.ok){
             currPack = responseJSON.pack.cards;
             packID = responseJSON.pack.id;
