@@ -20,7 +20,7 @@ exports.Game_Logic = class {
         this.tobj = table;
         this.state = WAITING;
 
-        this.num_users = 2;
+        this.num_users = 4;
         this.loaded = false;
         this.packs = undefined;
         this.pack_promise = createPacks(this.num_users);
@@ -87,11 +87,12 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'update_user_pack':
-                this.packs[data.pack.id - this.pack_count] = data.pack.cards;
+                this.packs[data.pack.id] = data.pack.cards;
                 this.returned++;
-                if(this.returned === this.num_users){
+                if(this.returned >= this.num_users){
+                    this.returned = 0;
                     this.pack_count = (this.pack_count + 1) % this.num_users;
-                    notify_all('get_hand');
+                    this.tobj.notify_all('get_hand');
                 }
                 return { ok: true };
 
