@@ -115,3 +115,7 @@ function start_game() {
  
         });
 }
+
+window.onload = () => {
+    window.localStorage.clear();
+}
