@@ -32,6 +32,9 @@ exports.Game_Logic = class {
                 this.send_hand_request();
             }
         });
+
+        this.pack_count = 0;
+        this.returned = 0;
     }
 
     /**
@@ -45,6 +48,8 @@ exports.Game_Logic = class {
      * Sets the draft state to Drafting and locks the table so no other users can join
      */
     start_draft() {
+        this.pack_count = 0;
+        this.returned = 0;
         this.state = DRAFTING;
         this.tobj.lock();
         this.num_users = this.tobj.users.length;
@@ -82,7 +87,7 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'update_user_pack':
-                console.log(data);
+                this.packs[data.id - this.pack_count] = data.cards;
                 return { data };
 
             case 'get_user_pack':
@@ -90,7 +95,8 @@ exports.Game_Logic = class {
                  * Sends a pack to the user based on the users table_id
                  */
                 if(this.loaded){
-                    return { ok: true, pack: this.packs[this.get_user_table_id(uobj)] }
+                    let id = (this.get_user_table_id(uobj) + this.pack_count) % this.num_users;
+                    return { ok: true, pack: { id: id, cards: this.packs[id] } }
                 } else {
                     return { ok: false }
                 }
