@@ -24,6 +24,7 @@ let cardSelected;
 let cardSelectedIndex;
 let currPack = [];
 let userDeck = [];
+let currID;
 
 function clearSelectedCards(parent) {
     for (const child of parent.children) {
@@ -80,7 +81,8 @@ async function getPackFromServer() {
     if (response.ok) {
         let responseJSON = await response.json();
         if(responseJSON.ok){
-            currPack = responseJSON.pack;
+            currPack = responseJSON.pack.cards;
+            currID = responseJSON.pack.id;
             renderCards(currPack, cardDiv, true);
         }
     }
@@ -92,7 +94,7 @@ async function sendPackToServer(pack) {
         command: 'game_request',
         game: {
             request: 'update_user_pack',
-            params: {pack: currPack}
+            params: {pack: {id: packID, card:currPack}}
         }
     };
 
