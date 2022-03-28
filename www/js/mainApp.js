@@ -94,7 +94,7 @@ async function sendPackToServer(pack) {
         command: 'game_request',
         game: {
             request: 'update_user_pack',
-            params: {pack: {id: packID, card:currPack}}
+            params: {pack: {id: packID, cards:currPack}}
         }
     };
 
