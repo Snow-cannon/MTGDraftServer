@@ -87,8 +87,11 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'update_user_pack':
-                this.packs[data.id - this.pack_count] = data.cards;
-                return { data };
+                let pack = data.pack;
+                let id = pack.id - this.pack_count;
+                console.log(pack);
+                this.packs[id] = pack.cards;
+                return { ok: true };
 
             case 'get_user_pack':
                 /**
