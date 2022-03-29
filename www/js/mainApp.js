@@ -7,7 +7,7 @@ const socket = io();
 const cardDiv = document.getElementById('pack_holder');
 const deckDiv = document.getElementById('deck_holder');
 const confirmButton = document.getElementById('confirm');
-const greyOut = document.getElementById('blackout');
+const greyOut = document.getElementById('playerwait');
 const ls = window.localStorage;
 
 socket.on('make_host', function (data) {
@@ -15,12 +15,14 @@ socket.on('make_host', function (data) {
 });
 
 socket.on('get_hand', function (data) {
-    console.log('hand requested');
     getPackFromServer();
 });
 
-socket.emit('request_hand');
+socket.on('get_load_count', function (data) {
+    get_num_loaded_packs();
+});
 
+socket.emit('request_hand');
 
 
 let cardSelected;
@@ -87,8 +89,37 @@ async function getPackFromServer() {
         if(responseJSON.ok){
             currPack = responseJSON.pack.cards;
             packID = responseJSON.pack.id;
+            document.getElementById('packsloaded').style.display = "none";
             renderCards(currPack, cardDiv, true);
             enablePlay();
+        }
+    }
+}
+
+
+async function get_num_loaded_packs() {
+    let name = '__request';
+    let data = {
+        command: 'game_request',
+        game: {
+            request: 'get_pack_load_count',
+            params: {}
+        }
+    };
+
+    let strdat = JSON.stringify(data);
+
+    let response = await fetch(name, {
+        method: "post",
+        body: strdat,
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+        let responseJSON = await response.json();
+        console.log(responseJSON);
+        if(responseJSON.ok){ //Returns { ok: bool, count: num_loaded_packs, out_of: num_players }
+            document.getElementById('packsloaded').innerHTML = responseJSON.count + ' / ' + responseJSON.out_of;
         }
     }
 }

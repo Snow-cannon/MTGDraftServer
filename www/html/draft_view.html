@@ -5,7 +5,8 @@
     <script src="/socket.io/socket.io.js" ></script>
 </head>
 <body>
-    <div id="blackout" style="display:none;">Awaiting Other Players...</div>
+    <div class="blackout" id="playerwait" style="display:none;">Awaiting Other Players...</div>
+    <div class="blackout" id="packsloaded" style="display:block;">0/X</div>
     <h1 id="pack_title">Pack</h1>
     <div id="pack_holder"></div>
     <button id="confirm">Confirm</button>

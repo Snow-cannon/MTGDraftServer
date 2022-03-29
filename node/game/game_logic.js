@@ -34,8 +34,12 @@ exports.Game_Logic = class {
         for (let i = 0; i < this.num_users * 3; ++i) {
             let response = await getPack();
             this.packs.push(response);
-            if (this.state === DRAFTING && (this.curr_pack_set + 1) * this.num_users === this.packs.length) {
-                this.send_hand_request();
+            if (this.state === DRAFTING) {
+                if ((this.curr_pack_set + 1) * this.num_users === this.packs.length) {
+                    this.send_hand_request(); //Start draft
+                } else {
+                    this.send_pack_load_update(); //Send an update on the number of items loaded
+                }
             }
         }
     }
@@ -45,6 +49,13 @@ exports.Game_Logic = class {
      */
     send_hand_request() {
         this.tobj.notify_all('get_hand');
+    }
+
+    /**
+     * Sends a notification to all table users that they can get their cards
+     */
+    send_pack_load_update() {
+        this.tobj.notify_all('get_load_count');
     }
 
     /**
@@ -59,10 +70,10 @@ exports.Game_Logic = class {
         this.num_users = this.tobj.users.length;
     }
 
-    reduce_num_packs(pack_set) {
-        this.packs[pack_set] = this.packs[pack_set].slice(0, this.num_users);
-        log('reduce_num_packs', 'deleting extras', { packs: this.packs[pack_set].length });
-    }
+    // reduce_num_packs(pack_set) {
+    //     this.packs[pack_set] = this.packs[pack_set].slice(0, this.num_users);
+    //     log('reduce_num_packs', 'deleting extras', { packs: this.packs[pack_set].length });
+    // }
 
     /**
      * Gets quick data from the server
@@ -118,11 +129,11 @@ exports.Game_Logic = class {
                 if (this.is_loaded()) {
                     let id;
                     //If the current set is even
-                    if((this.curr_pack_set % 2) == 0){
+                    if ((this.curr_pack_set % 2) == 0) {
                         //Index to the right in the pack array
                         id = modulo((this.get_user_table_id(uobj) + this.pack_count), this.num_users) + (this.curr_pack_set * this.num_users);
                     }
-                    else{
+                    else {
                         //Index to the left in the pack array
                         id = modulo((this.pack_count - this.get_user_table_id(uobj)), this.num_users) + (this.curr_pack_set * this.num_users);
                     }
@@ -139,6 +150,10 @@ exports.Game_Logic = class {
                 uobj.notify_self('reload'); //Notify the user sending the request to reload
                 uobj.notify_table('reload'); //Notify the table to reload
                 return { ok: true, state: this.state }; //Return the new game state
+
+            case 'get_pack_load_count':
+                return { ok: true, count: (this.packs.length % this.num_users), out_of: this.num_users };
+
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
                 return { ok: false };
@@ -156,6 +171,6 @@ exports.Game_Logic = class {
 
 }
 
-function modulo(num, n){
-        return ((num%n)+n)%n;
+function modulo(num, n) {
+    return ((num % n) + n) % n;
 }
