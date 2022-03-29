@@ -82,7 +82,7 @@ function js_root() {
 app.get('/', (req, res) => {
 
     //Set the main game path
-    var pp = path.join(www_root(), 'html', 'wait_room.html');
+    var pp = path.join(www_root(), 'html', 'waiting_room.html');
 
     //Create cookie reset functions
 
@@ -91,7 +91,7 @@ app.get('/', (req, res) => {
         req.session.table_id = -1;
         res.cookie('table_id', -1);
         req.cookies.table_id = -1;
-        pp = path.join(www_root(), 'html', 'join.html');
+        pp = path.join(www_root(), 'html', '.html');
     }
 
     //If their table ID is invalid, send them to the join page
@@ -99,7 +99,7 @@ app.get('/', (req, res) => {
         req.session.user_id = -1;
         res.cookie('user_id', -1);
         req.cookies.user_id = -1;
-        pp = path.join(www_root(), 'html', 'join.html');
+        pp = path.join(www_root(), 'html', 'join_room.html');
     }
 
     //Check for an outdated cookie
@@ -147,7 +147,7 @@ app.get('/', (req, res) => {
                 req.session.table_id = table_id;
 
                 if (tables.get_table(table_id).get_game_state() === 'drafting') {
-                    var pp = path.join(www_root(), 'html', 'draft_view.html');
+                    var pp = path.join(www_root(), 'html', 'draft_room.html');
                 }
             }
         }

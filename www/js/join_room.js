@@ -23,8 +23,6 @@ namewidget.value = cookie.getCookie('user_name');
 namewidget.focus();
 
 
-
-
 function join_table(evt) {
 
     if (namewidget.value === '') {

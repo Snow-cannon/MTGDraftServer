@@ -7,30 +7,13 @@ const socket = io();
 
 let logger = new Logger(true);
 
-let table_id_display = document.getElementById('table_id_display');
-let user_id_display = document.getElementById('user_id_display');
-let user_name_display = document.getElementById('user_name_display');
-
-let user_id = cookie.getCookie('user_id');
-let table_id = cookie.getCookie('table_id');
-let user_name = cookie.getCookie('user_name');
-
-let bleep_button = document.getElementById('bleep');
+//Set up buttons
 let bail_button = document.getElementById('bail');
 let start_button = document.getElementById('start');
-
-start_button.style.display = 'none';
-
-bleep_button.onclick = () => socket.emit('bleep');
 bail_button.onclick = leave_table;
 start_button.onclick = start_game;
 
-table_id_display.innerText = 'table: ' + table_id;
-user_id_display.innerText = 'user: ' + user_id;
-user_name_display.innerText = 'Name: ' + user_name;
-
-
-
+//Set up socket listeners
 socket.on('log', function (data) {
     console.log(data);
 });
@@ -47,9 +30,11 @@ socket.on('revoke_host', function (data) {
     start_button.style.display = 'none';
 });
 
+//Detect if you are the host
 socket.emit('am_host');
 
 
+//Define functions
 function leave_table() {
 
     let name = '__request';
@@ -116,6 +101,8 @@ function start_game() {
         });
 }
 
+//Clear the users local storage upon entering the waiting room
+//Data need not be saved between games, so this is an optimal time to clear it
 window.onload = () => {
     window.localStorage.clear();
 }
