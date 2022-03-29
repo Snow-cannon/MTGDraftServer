@@ -68,19 +68,30 @@ exports.getPack = async function () {
     pack.push(await getCard("https://api.scryfall.com/cards/random?q=usd>%3D10+t%3Aland+lang%3Aen"));
     colorConsistency = colorCheck(colorConsistency, pack[curElem].color);
     curElem++;
+
+    await new Promise((r) => setTimeout(r, 100));
+
     //Foil Analog
     pack.push(await getCard("https://api.scryfall.com/cards/random?q=%28block%3Ahtr+or+set%3Acmb2+or+%28set%3Apcel+%28t%3Acreature+or+t%3Asummon%29%29+or+%28border%3Asilver+and+usd>%3D7%29%29+-is%3Atoken+-t%3Aland+lang%3Aen"));
     colorConsistency = colorCheck(colorConsistency, pack[curElem].color);
     curElem++;
+
+    await new Promise((r) => setTimeout(r, 100));
+
     //Rare Analog
     pack.push(await getCard("https://api.scryfall.com/cards/random?q=%28usd>%3D100+-is%3Atoken+-t%3Aland%29+lang%3Aen"));
     colorConsistency = colorCheck(colorConsistency, pack[curElem].color);
     curElem++;
+
+    await new Promise((r) => setTimeout(r, 100));
+
     //Uncommon Analog
     for (let i = 0; i < 3; ++i) {
         pack.push(await getCard("https://api.scryfall.com/cards/random?q=%28usd<%3D100+usd>%3D10+-is%3Atoken+-t%3Aland%29+lang%3Aen"));
         colorConsistency = colorCheck(colorConsistency, pack[curElem].color);
         curElem++;
+
+        await new Promise((r) => setTimeout(r, 100));
     }
     //Common Analog
     let apiCall = "https://api.scryfall.com/cards/random?q=usd<%3D10+%28rarity%3Arare+or+rarity%3Amythic%29%28-is%3Atoken+-t%3Aland+-is%3Adigital+-set%3Apcel+-block%3Ahtr+-set%3Acmb2+-set%3Acmb1%29-%28type%3Aplane+or+type%3Ascheme%29+lang%3Aen";
@@ -96,6 +107,8 @@ exports.getPack = async function () {
         pack.push(await getCard(curApiCall));
         colorConsistency = colorCheck(colorConsistency, pack[curElem].color);
         curElem++;
+
+        await new Promise((r) => setTimeout(r, 100));
     }
 
     return pack;

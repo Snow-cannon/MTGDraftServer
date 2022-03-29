@@ -116,7 +116,16 @@ exports.Game_Logic = class {
                  * Sends a pack to the user based on the users table_id
                  */
                 if (this.is_loaded()) {
-                    let id = ((this.get_user_table_id(uobj) + this.pack_count) % this.num_users) + (this.curr_pack_set * this.num_users);
+                    let id;
+                    //If the current set is even
+                    if((this.curr_pack_set % 2) == 0){
+                        //Index to the right in the pack array
+                        id = modulo((this.get_user_table_id(uobj) + this.pack_count), this.num_users) + (this.curr_pack_set * this.num_users);
+                    }
+                    else{
+                        //Index to the left in the pack array
+                        id = modulo((this.pack_count - this.get_user_table_id(uobj)), this.num_users) + (this.curr_pack_set * this.num_users);
+                    }
                     return { ok: true, pack: { id: id, cards: this.packs[id] } }
                 } else {
                     return { ok: false }
@@ -145,4 +154,8 @@ exports.Game_Logic = class {
         return this.tobj.users.indexOf(uobj);
     }
 
+}
+
+function modulo(num, n){
+        return ((num%n)+n)%n;
 }
