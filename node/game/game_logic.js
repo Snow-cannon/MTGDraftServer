@@ -154,6 +154,10 @@ exports.Game_Logic = class {
             case 'get_pack_load_count':
                 return { ok: true, count: (this.packs.length % this.num_users), out_of: this.num_users };
 
+            case 'get_usernames':
+                let names = this.tobj.users.map(uobj => uobj.display_name );
+                return { ok: true, names: names };
+
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
                 return { ok: false };

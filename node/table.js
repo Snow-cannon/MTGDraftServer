@@ -75,7 +75,7 @@ class Table {
                 }
             } else {
                 //Notify the table that the user left
-                uobj.notify_table('log', 'User ' + users.get_user(user_id).display_name + ' left');
+                uobj.notify_table('user_left', users.get_user(user_id).display_name);
             }
 
             //Set the user to be no longer in the table

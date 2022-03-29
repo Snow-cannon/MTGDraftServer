@@ -1,9 +1,6 @@
 "use_strict";
 
 import * as cookie from './cookie.js';
-import { Logger } from './logger.js';
-
-let logger = new Logger(true);
 
 var join_button = document.getElementById("joinTable");
 join_button.onclick = join_table;
@@ -33,8 +30,6 @@ function join_table(evt) {
         cookie.setCookie('user_name', namewidget.value, 1);
     }
 
-    logger.log('join_table', 'Requesting to join table', tablewidget.value);
-
     let name = '__request';
     let data = {
         command: 'join_table',
@@ -49,24 +44,18 @@ function join_table(evt) {
         headers: { 'Content-Type': 'application/json' }
     })
         .catch(function (error) {
-            logger.log('join_table', 'Error creating table', error);
         })
         .then(function (response) {
             let res = response.json();
-            logger.log('join_table', 'returned resource', res);
             return res;
         })
         .then(function (data) {
-            logger.log('join_table', 'Table created', data.table_id);
-            logger.log('join_table', 'User ID', data.user_id);
 
             cookie.setCookie('table_id', data.table_id);
             cookie.setCookie('user_id', data.user_id);
 
             let table_id = cookie.getCookie('table_id');
-            console.log(table_id);
             if (table_id > -1) {
-                logger.log('join_table', 'Table_ID Cookie', cookie.getCookie('table_id'));
             } else {
                 alert('Join failed');
             }
@@ -90,8 +79,6 @@ function create_table(evt) {
         cookie.setCookie('user_name', namewidget.value, 1);
     }
 
-    logger.log('create_table', 'Requesting new table');
-
     let name = '__request';
     let data = {
         command: 'create_table'
@@ -105,24 +92,18 @@ function create_table(evt) {
         headers: { 'Content-Type': 'application/json' }
     })
         .catch(function (error) {
-            logger.log('create_table', 'Error creating table', error);
         })
         .then(function (response) {
             let res = response.json();
-            logger.log('create_table', 'returned resource', res);
             return res;
         })
         .then(function (data) {
-            logger.log('create_table', 'Table created', data.table_id);
-            logger.log('create_table', 'User ID', data.user_id);
 
             cookie.setCookie('table_id', data.table_id);
             cookie.setCookie('user_id', data.user_id);
 
             //Set username cookie
             cookie.setCookie('user_name', namewidget.value, 1);
-
-            logger.log('create_table', 'Table_ID Cookie', cookie.getCookie('table_id'));
 
             if (data.table_id > -1) {
                 location.reload();

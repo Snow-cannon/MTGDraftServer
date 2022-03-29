@@ -425,6 +425,7 @@ app.post('/__request', (req, res) => {
 
         case 'leave_table':
             tables.leave_table(user_id);
+            uobj = users.get_user(user_id);
 
             log('POST', 'User left table', { table_id: table_id });
 
@@ -504,7 +505,7 @@ io.on('connection', function (socket) {
         let uobj = users.get_user(socket.request.session.user_id);
         uobj.set_socket(socket);
         uobj.activate();
-        uobj.notify_table('log', uobj.display_name + ' joined');
+        uobj.notify_table('user_joined', uobj.display_name);
         let tobj = uobj.get_table();
         if (tobj !== undefined && tobj.host === undefined) {
             tobj.set_host();
@@ -542,7 +543,7 @@ io.on('connection', function (socket) {
             if (tobj !== undefined) {
                 tobj.set_host();
             }
-            uobj.notify_table('log', 'User ' + users.get_user(uobj.id).display_name + ' disconnected');
+            uobj.notify_table('user_disconnected', uobj.display_name);
         });
     });
 
