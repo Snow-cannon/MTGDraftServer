@@ -13,6 +13,11 @@ start_button.onclick = start_game;
 //Set up name table
 let user_table = document.getElementById('user_table');
 
+//Set up table_id
+let table_id_elem = document.getElementById('table_id');
+let table_id = cookie.getCookie('table_id');
+table_id_elem.innerText = 'Table: ' + table_id;
+
 //Set up socket listeners
 socket.on('log', function (data) {
     console.log(data);
@@ -31,15 +36,15 @@ socket.on('revoke_host', function (data) {
 });
 
 socket.on('user_joined', function (data) {
-    add_user_to_table(data);
+    add_user_to_table(data.name, data.id);
 });
 
 socket.on('user_left', function (data) {
-    remove_user_from_table(data);
+    remove_user_from_table(data.id);
 });
 
 socket.on('user_disconnected', function (data) {
-    remove_user_from_table(data);
+    remove_user_from_table(data.id);
 });
 
 //Detect if you are the host
@@ -79,25 +84,29 @@ function get_usernames() {
                 }
 
                 //Build up the new table of names
-                data.names.map(name => { add_user_to_table(name); });
+                data.data.map(uobj => { add_user_to_table(uobj.name, uobj.id); });
             }
         });
 
 }
 
-function add_user_to_table(name) {
+function add_user_to_table(name, id) {
     let tr = document.createElement('tr');
     let td = document.createElement('td');
     td.textContent = name;
     tr.classList.add('username_display');
-    tr.id = 'display_name:' + name;
+    tr.id = 'user_id:' + id;
     console.log(tr);
     tr.appendChild(td);
     user_table.appendChild(tr);
 }
 
-function remove_user_from_table(name){
-    document.getElementById('display_name:' + name).remove();
+function remove_user_from_table(id){
+    let elem = document.getElementById('user_id:' + id);
+    while(elem){
+        elem.remove();
+        elem = document.getElementById('user_id:' + id);
+    }
 }
 
 

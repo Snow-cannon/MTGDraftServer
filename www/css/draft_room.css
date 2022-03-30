@@ -1,10 +1,9 @@
-body {
-    background-color: blanchedalmond;
-}
-
 div {
     margin: 2px;
-    border: 3px black solid;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px rgb(103, 122, 95) solid;
+    background-color: rgb(123, 158, 106);
 }
 
 h1 {

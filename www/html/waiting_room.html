@@ -1,18 +1,30 @@
 <!DOCTYPE html>
+
 <head>
     <title>Waiting Room</title>
+    <link href="../css/basic.css" rel="stylesheet">
     <link href="../css/waiting_room.css" rel="stylesheet">
-    <script src="/socket.io/socket.io.js" ></script>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
-    <div id="users">
+    <div id="center">
         <!-- This will hold a table of usernames so the host can know when everyone is in -->
+        <h4 id="table_title">Users</h4>
         <table id="user_table">
 
         </table>
+        <table id="button_container">
+            <tr>
+                <td> <button id="start" style="display: none;">Start Draft</button> </td>
+            </tr>
+            <tr>
+                <td> <button id="bail">Leave Table</button> </td>
+            </tr>
+            <tr>
+                <td> <p id="table_id"></p> </td>
+            </tr>
+        </table>
     </div>
-    <button id="bail">Leave Table</button>
-    <button id="start" style="display: none;">Start</button>
     <script type="module" src="../js/waiting_room.js"></script>
 </body>

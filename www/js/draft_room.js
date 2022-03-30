@@ -11,6 +11,7 @@ const greyOut = document.getElementById('playerwait');
 const ls = window.localStorage;
 
 socket.on('make_host', function (data) {
+    //Add any host-specific data here
     console.log('You are host!');
 });
 
@@ -22,7 +23,8 @@ socket.on('get_load_count', function (data) {
     get_num_loaded_packs();
 });
 
-socket.emit('request_hand');
+//Emit 'ping' to notify the server you are requesting a game emission
+socket.emit('ping', 'request_hand');
 
 
 let cardSelected;

@@ -505,7 +505,7 @@ io.on('connection', function (socket) {
         let uobj = users.get_user(socket.request.session.user_id);
         uobj.set_socket(socket);
         uobj.activate();
-        uobj.notify_table('user_joined', uobj.display_name);
+        uobj.notify_table('user_joined', { name: uobj.display_name, id: uobj.id });
         let tobj = uobj.get_table();
         if (tobj !== undefined && tobj.host === undefined) {
             tobj.set_host();
@@ -543,7 +543,7 @@ io.on('connection', function (socket) {
             if (tobj !== undefined) {
                 tobj.set_host();
             }
-            uobj.notify_table('user_disconnected', uobj.display_name);
+            uobj.notify_table('user_disconnected', { name: uobj.display_name, id: uobj.id });
         });
     });
 
@@ -555,10 +555,10 @@ io.on('connection', function (socket) {
         });
     });
 
-    socket.on('request_hand', function (e) {
+    socket.on('ping', function (e) {
         validate_callback(socket, (socket, uobj) => {
-            uobj.ping_table('request_hand', undefined, uobj);
-        })
+            uobj.ping_table(e, undefined, uobj);
+        });
     });
 
 });
