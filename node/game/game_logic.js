@@ -104,7 +104,7 @@ exports.Game_Logic = class {
     make_request(request, data, uobj) {
         switch (request) {
             case 'update_user_pack':
-                this.packs[data.pack.id] = data.pack.cards;
+                this.packs[data.pack.id] = shuffle(data.pack.cards);
                 this.returned++;
                 if (this.returned >= this.num_users) {
                     this.returned = 0;
@@ -178,3 +178,21 @@ exports.Game_Logic = class {
 function modulo(num, n) {
     return ((num % n) + n) % n;
 }
+
+function shuffle(array) {
+    var m = array.length, t, i;
+  
+    // While there remain elements to shuffle…
+    while (m) {
+  
+      // Pick a remaining element…
+      i = Math.floor(Math.random() * m--);
+  
+      // And swap it with the current element.
+      t = array[m];
+      array[m] = array[i];
+      array[i] = t;
+    }
+  
+    return array;
+  }
