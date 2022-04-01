@@ -45,7 +45,7 @@ async function getCard(uri) {
             }
             img_url = responseJSON.image_uris.png;
         }
-        return { name: cardName, img: img_url, back: card_back, color: color_identity };
+        return { name: cardName, img: img_url, back: card_back, color: color_identity, CMC: responseJSON.cmc };
     }
 }
 
