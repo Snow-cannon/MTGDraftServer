@@ -10,46 +10,59 @@ let start_button = document.getElementById('start');
 bail_button.onclick = leave_table;
 start_button.onclick = start_game;
 
+//Set up cube-import element
+const cubeInput = document.getElementById('cube_import');
+cubeInput.addEventListener('input', (e) => { //Set row count to be in the range 2 < n < 10
+    let rows = cubeInput.value.split("\n").length;
+    cubeInput.rows = Math.min(10, Math.max(rows, 2));
+});
+
+//Get wrapper div. Hides all cube-import elements
+const import_cube_wrapper = document.getElementById('wrapper');
+import_cube_wrapper.style.display = 'none';
+
 //Set up name table
 let user_table = document.getElementById('user_table');
 
 //Set up table_id
 let table_id_elem = document.getElementById('table_id');
 let table_id = cookie.getCookie('table_id');
-table_id_elem.innerText = 'Table: ' + table_id;
+table_id_elem.innerText = 'Table: ' + table_id; //Display the table ID
 
 //Set up socket listeners
-socket.on('log', function (data) {
+socket.on('log', function (data) { //Log server data
     console.log(data);
 });
 
-socket.on('reload', function (data) {
+socket.on('reload', function (data) { //Force a page reload
     location.reload();
 });
 
-socket.on('make_host', function (data) {
+socket.on('make_host', function (data) { //Set yourself to be the host
     start_button.style.display = 'inline';
+    import_cube_wrapper.style.display = 'inline';
 });
 
-socket.on('revoke_host', function (data) {
+socket.on('revoke_host', function (data) { //Set yourself as a basic player
     start_button.style.display = 'none';
+    import_cube_wrapper.style.display = 'none';
 });
 
-socket.on('user_joined', function (data) {
+socket.on('user_joined', function (data) { //Add to the user table
     add_user_to_table(data.name, data.id);
 });
 
-socket.on('user_left', function (data) {
+socket.on('user_left', function (data) { //Remove from the user table
     remove_user_from_table(data.id);
 });
 
-socket.on('user_disconnected', function (data) {
+socket.on('user_disconnected', function (data) { //Remove from the user table
     remove_user_from_table(data.id);
 });
 
 //Detect if you are the host
 socket.emit('am_host');
-get_usernames();
+get_usernames(); //Fill the username table with current users
 
 
 function get_usernames() {
@@ -108,9 +121,6 @@ function remove_user_from_table(id){
         elem = document.getElementById('user_id:' + id);
     }
 }
-
-
-
 
 //Define functions
 function leave_table() {

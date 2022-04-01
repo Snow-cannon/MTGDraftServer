@@ -1,5 +1,5 @@
 * {
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 /* All buttons */
@@ -14,4 +14,9 @@ button, #table_id {
 body {
     text-align: center;
     background-color: rgb(136, 160, 125);
+}
+
+textarea {
+    border-radius: 5px;
+    resize: none;
 }

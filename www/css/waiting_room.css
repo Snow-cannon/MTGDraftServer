@@ -1,5 +1,3 @@
-
-
 p, h4 {
     margin: auto;
 }
@@ -18,15 +16,24 @@ table {
     border: 2px solid rgb(60, 88, 47);
     border-radius: 5px;
 }
+
 /* Div that holds the table of active users */
 #center {
     text-align: center;
     position: absolute;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    top: 1%;
+    /* bottom: 1%; */
+    transform: translate(-50%, 0);
+    width: 50%;
+    margin: auto;
     padding: 10px;
     border-radius: 10px;
     border: 2px rgb(103, 122, 95) solid;
     background-color: rgb(123, 158, 106);
+}
+
+textarea {
+    box-sizing: border-box;
+    width: 100%;
 }
