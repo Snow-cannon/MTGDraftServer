@@ -15,7 +15,9 @@ exports.load_cube = function(cubeData) {
             return { ok: false, error: "String " + elem + " is not an acceptable input." }
         }
         cardName = elem.slice(elem.indexOf(' ')+1, elem.length);
-        cardArray.push({num, cardName});
+        for(let i = 0; i < num; ++i){
+            cardArray.push(cardName);
+        }
     }
 
     return { ok: true, cardArray: cardArray }
