@@ -2,7 +2,7 @@
 
 const { response } = require('express');
 const { log, log_in, statement, set_logger_theme, set_max_height, set_max_depth } = require('../logger.js');
-const { createPacks, getPack } = require('./pack_control.js');
+const { createPacks, getPack, getCube } = require('./pack_control.js');
 const { load_cube } = require('./cube_import.js');
 const WAITING = 'waiting',
     DRAFTING = 'drafting';
@@ -28,7 +28,7 @@ exports.Game_Logic = class {
         this.num_users = 4;
         this.packs = [];
 
-        this.get_packs();
+        // this.get_packs();
     }
 
     async get_packs() {
@@ -45,6 +45,13 @@ exports.Game_Logic = class {
         }
     }
 
+    async get_cube(card_array, num_packs, num_cards_per_pack){
+        let result = await getCube(card_array, num_packs, num_cards_per_pack);
+        console.log('hand finished');
+        this.packs = result;
+        this.send_hand_request();
+    }
+    
     /**
      * Sends a notification to all table users that they can get their cards
      */
@@ -58,20 +65,21 @@ exports.Game_Logic = class {
     send_pack_load_update() {
         this.tobj.notify_all('get_load_count');
     }
-
+    
     /**
      * Sets the draft state to Drafting and locks the table so no other users can join
      */
      start_draft(cube_data) {
         let import_result = load_cube(cube_data);
         if (import_result.ok) {
-            console.log(import_result.cardArray);
+            // let me = this;
             this.pack_count = 0;
             this.curr_pack_set = 0;
             this.returned = 0;
             this.state = DRAFTING;
             this.tobj.lock();
             this.num_users = this.tobj.users.length;
+            this.packs = this.get_cube(import_result.cardArray, this.num_users * 3, 15);
         } else {
             console.log(import_result.error);
         }

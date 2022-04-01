@@ -16,6 +16,7 @@ socket.on('make_host', function (data) {
 });
 
 socket.on('get_hand', function (data) {
+    console.log('told to get hand');
     getPackFromServer();
 });
 

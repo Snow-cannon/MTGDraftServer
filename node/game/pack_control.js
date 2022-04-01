@@ -32,10 +32,7 @@ async function getCard(uri) {
         if (responseJSON.image_status === "missing") {
             return await getCard(uri);
         }
-        if (responseJSON.card_faces !== undefined) {
-            if (responseJSON.card_faces[0].image_uris === undefined || responseJSON.card_faces[1].image_uris === undefined) {
-                return await getCard(uri);
-            }
+        if (responseJSON.card_faces !== undefined && responseJSON.card_faces[0].image_uris !== undefined && responseJSON.card_faces[1].image_uris !== undefined) {
             img_url = responseJSON.card_faces[0].image_uris.png;
             card_back = responseJSON.card_faces[1].image_uris.png;
         }
@@ -50,8 +47,8 @@ async function getCard(uri) {
 }
 
 
-function colorCheck(colorConsistency, colorIdentity){
-    if (colorIdentity.length > 1){
+function colorCheck(colorConsistency, colorIdentity) {
+    if (colorIdentity.length > 1) {
         colorConsistency.M++;
     }
     else if (colorIdentity.length == 1) {
@@ -62,15 +59,20 @@ function colorCheck(colorConsistency, colorIdentity){
 
 exports.getCube = async function (cardArray, numPacks, numCards) {
     let packArray = [];
-    for(let i = 0; i < numPacks; ++i){
+    for (let i = 0; i < numPacks; i++) {
         let pack = [];
-        for(let j = 0; j < numCards; ++j){
-            let cardName = cardArray[Math.floor(Math.random()*cardArray.length)];
-            pack.push(await getCard("https://api.scryfall.com/cards/named?" + encodeURIComponent(cardName)));
+        for (let j = 0; j < numCards; j++) {
+            await new Promise((r) => setTimeout(r, 100));
+            let choice = Math.floor(Math.random() * cardArray.length);
+            let cardName = cardArray[choice];
+            cardArray.splice(choice, 1);
+            cardName = cardName.replace(/[^a-zA-Z ]/g, " ");
+            pack.push(await getCard("https://api.scryfall.com/cards/named?fuzzy=" + encodeURIComponent(cardName)));
         }
         packArray.push(pack);
         pack = [];
     }
+    console.log('DONE');
     return packArray;
 }
 
