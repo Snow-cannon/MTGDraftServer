@@ -3,6 +3,7 @@
 const { response } = require('express');
 const { log, log_in, statement, set_logger_theme, set_max_height, set_max_depth } = require('../logger.js');
 const { createPacks, getPack } = require('./pack_control.js');
+const { load_cube } = require('./cube_import.js');
 const WAITING = 'waiting',
     DRAFTING = 'drafting';
 
@@ -61,13 +62,15 @@ exports.Game_Logic = class {
     /**
      * Sets the draft state to Drafting and locks the table so no other users can join
      */
-    start_draft() {
-        this.pack_count = 0;
-        this.curr_pack_set = 0;
-        this.returned = 0;
-        this.state = DRAFTING;
-        this.tobj.lock();
-        this.num_users = this.tobj.users.length;
+    start_draft(cube_data) {
+        if (load_cube(cube_data)) {
+            this.pack_count = 0;
+            this.curr_pack_set = 0;
+            this.returned = 0;
+            this.state = DRAFTING;
+            this.tobj.lock();
+            this.num_users = this.tobj.users.length;
+        }
     }
 
     // reduce_num_packs(pack_set) {
@@ -147,7 +150,7 @@ exports.Game_Logic = class {
             //Sets the game state to the drafting mode
             case 'start_game':
                 if (validate_host(uobj)) {
-                    this.start_draft(); //Change the state
+                    this.start_draft(data.cubeData); //Change the state
                     uobj.notify_self('reload'); //Notify the user sending the request to reload
                     uobj.notify_table('reload'); //Notify the table to reload
                     return { ok: true, state: this.state }; //Return the new game state
