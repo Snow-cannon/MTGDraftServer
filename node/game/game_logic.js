@@ -146,10 +146,14 @@ exports.Game_Logic = class {
 
             //Sets the game state to the drafting mode
             case 'start_game':
-                this.start_draft(); //Change the state
-                uobj.notify_self('reload'); //Notify the user sending the request to reload
-                uobj.notify_table('reload'); //Notify the table to reload
-                return { ok: true, state: this.state }; //Return the new game state
+                if (validate_host(uobj)) {
+                    this.start_draft(); //Change the state
+                    uobj.notify_self('reload'); //Notify the user sending the request to reload
+                    uobj.notify_table('reload'); //Notify the table to reload
+                    return { ok: true, state: this.state }; //Return the new game state
+                } else {
+                    return { ok: false };
+                }
 
             case 'get_pack_load_count':
                 return { ok: true, count: (this.packs.length % this.num_users), out_of: this.num_users };
@@ -175,24 +179,28 @@ exports.Game_Logic = class {
 
 }
 
+function validate_host(uobj) {
+    return uobj.is_host;
+}
+
 function modulo(num, n) {
     return ((num % n) + n) % n;
 }
 
 function shuffle(array) {
     var m = array.length, t, i;
-  
+
     // While there remain elements to shuffle…
     while (m) {
-  
-      // Pick a remaining element…
-      i = Math.floor(Math.random() * m--);
-  
-      // And swap it with the current element.
-      t = array[m];
-      array[m] = array[i];
-      array[i] = t;
+
+        // Pick a remaining element…
+        i = Math.floor(Math.random() * m--);
+
+        // And swap it with the current element.
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
     }
-  
+
     return array;
-  }
+}

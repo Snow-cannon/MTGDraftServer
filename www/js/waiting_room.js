@@ -5,10 +5,10 @@ import * as cookie from './cookie.js';
 const socket = io();
 
 //Set up buttons
-let bail_button = document.getElementById('bail');
-let start_button = document.getElementById('start');
-bail_button.onclick = leave_table;
-start_button.onclick = start_game;
+let bailButton = document.getElementById('bail');
+let startButton = document.getElementById('start');
+bailButton.onclick = leaveTable;
+startButton.onclick = startGame;
 
 //Set up cube-import element
 const cubeInput = document.getElementById('cube_import');
@@ -18,16 +18,16 @@ cubeInput.addEventListener('input', (e) => { //Set row count to be in the range 
 });
 
 //Get wrapper div. Hides all cube-import elements
-const import_cube_wrapper = document.getElementById('wrapper');
-import_cube_wrapper.style.display = 'none';
+const importCubeWrapper = document.getElementById('wrapper');
+importCubeWrapper.style.display = 'none';
 
 //Set up name table
-let user_table = document.getElementById('user_table');
+let userTable = document.getElementById('user_table');
 
 //Set up table_id
-let table_id_elem = document.getElementById('table_id');
-let table_id = cookie.getCookie('table_id');
-table_id_elem.innerText = 'Table: ' + table_id; //Display the table ID
+let tableIdElem = document.getElementById('table_id');
+let tableId = cookie.getCookie('table_id');
+tableIdElem.innerText = 'Table: ' + tableId; //Display the table ID
 
 //Set up socket listeners
 socket.on('log', function (data) { //Log server data
@@ -39,33 +39,33 @@ socket.on('reload', function (data) { //Force a page reload
 });
 
 socket.on('make_host', function (data) { //Set yourself to be the host
-    start_button.style.display = 'inline';
-    import_cube_wrapper.style.display = 'inline';
+    startButton.style.display = 'inline';
+    importCubeWrapper.style.display = 'inline';
 });
 
 socket.on('revoke_host', function (data) { //Set yourself as a basic player
-    start_button.style.display = 'none';
-    import_cube_wrapper.style.display = 'none';
+    startButton.style.display = 'none';
+    importCubeWrapper.style.display = 'none';
 });
 
 socket.on('user_joined', function (data) { //Add to the user table
-    add_user_to_table(data.name, data.id);
+    addUserToTable(data.name, data.id);
 });
 
 socket.on('user_left', function (data) { //Remove from the user table
-    remove_user_from_table(data.id);
+    removeUserFromTable(data.id);
 });
 
 socket.on('user_disconnected', function (data) { //Remove from the user table
-    remove_user_from_table(data.id);
+    removeUserFromTable(data.id);
 });
 
 //Detect if you are the host
 socket.emit('am_host');
-get_usernames(); //Fill the username table with current users
+getUsernames(); //Fill the username table with current users
 
 
-function get_usernames() {
+function getUsernames() {
 
     let name = '__request';
     let data = {
@@ -92,18 +92,18 @@ function get_usernames() {
         .then(function (data) {
             if (data.ok) {
                 //Clear the name table
-                while (user_table.firstChild) {
-                    user_table.removeChild(user_table.firstChild);
+                while (userTable.firstChild) {
+                    userTable.removeChild(userTable.firstChild);
                 }
 
                 //Build up the new table of names
-                data.data.map(uobj => { add_user_to_table(uobj.name, uobj.id); });
+                data.data.map(uobj => { addUserToTable(uobj.name, uobj.id); });
             }
         });
 
 }
 
-function add_user_to_table(name, id) {
+function addUserToTable(name, id) {
     let tr = document.createElement('tr');
     let td = document.createElement('td');
     td.textContent = name;
@@ -111,10 +111,10 @@ function add_user_to_table(name, id) {
     tr.id = 'user_id:' + id;
     console.log(tr);
     tr.appendChild(td);
-    user_table.appendChild(tr);
+    userTable.appendChild(tr);
 }
 
-function remove_user_from_table(id){
+function removeUserFromTable(id){
     let elem = document.getElementById('user_id:' + id);
     while(elem){
         elem.remove();
@@ -123,7 +123,7 @@ function remove_user_from_table(id){
 }
 
 //Define functions
-function leave_table() {
+function leaveTable() {
 
     let name = '__request';
     let data = {
@@ -152,14 +152,16 @@ function leave_table() {
 
 }
 
-function start_game() {
+function startGame() {
 
     let name = '__request';
     let data = {
         command: 'game_request',
         game: {
             request: 'start_game',
-            params: {}
+            params: {
+                cubeData: cubeInput.value
+            }
         }
     };
 

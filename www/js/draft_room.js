@@ -20,7 +20,7 @@ socket.on('get_hand', function (data) {
 });
 
 socket.on('get_load_count', function (data) {
-    get_num_loaded_packs();
+    getNumLoadedPacks();
 });
 
 //Emit 'ping' to notify the server you are requesting a game emission
@@ -99,7 +99,7 @@ async function getPackFromServer() {
 }
 
 
-async function get_num_loaded_packs() {
+async function getNumLoadedPacks() {
     let name = '__request';
     let data = {
         command: 'game_request',

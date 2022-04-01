@@ -2,17 +2,17 @@
 
 import * as cookie from './cookie.js';
 
-var join_button = document.getElementById("joinTable");
-join_button.onclick = join_table;
+var joinButton = document.getElementById("joinTable");
+joinButton.onclick = joinTable;
 
-var create_button = document.getElementById("createTable");
-create_button.onclick = create_table;
+var createButton = document.getElementById("createTable");
+createButton.onclick = createTable;
 
 let tablewidget = document.getElementById("tableID");
-let old_table_id = cookie.getCookie('table_id');
+let oldTableId = cookie.getCookie('table_id');
 tablewidget.value = '';
-if (old_table_id > -1) {
-    tablewidget.value = old_table_id;
+if (oldTableId > -1) {
+    tablewidget.value = oldTableId;
 }
 
 let namewidget = document.getElementById("userName");
@@ -20,7 +20,7 @@ namewidget.value = cookie.getCookie('user_name');
 namewidget.focus();
 
 
-function join_table(evt) {
+function joinTable(evt) {
 
     if (namewidget.value === '') {
         alert('You must enter a username!');
@@ -69,7 +69,7 @@ function join_table(evt) {
 
 
 
-function create_table(evt) {
+function createTable(evt) {
 
     if (namewidget.value === '') {
         alert('You must enter a username!');
