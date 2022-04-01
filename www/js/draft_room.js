@@ -87,7 +87,7 @@ async function getPackFromServer() {
 
     if (response.ok) {
         let responseJSON = await response.json();
-        console.log(responseJSON);
+        // console.log(responseJSON);
         if(responseJSON.ok){
             currPack = responseJSON.pack.cards;
             packID = responseJSON.pack.id;
@@ -119,7 +119,7 @@ async function getNumLoadedPacks() {
 
     if (response.ok) {
         let responseJSON = await response.json();
-        console.log(responseJSON);
+        // console.log(responseJSON);
         if(responseJSON.ok){ //Returns { ok: bool, count: num_loaded_packs, out_of: num_players }
             document.getElementById('packsloaded').innerHTML = responseJSON.count + ' / ' + responseJSON.out_of;
         }

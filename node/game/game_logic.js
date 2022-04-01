@@ -62,14 +62,18 @@ exports.Game_Logic = class {
     /**
      * Sets the draft state to Drafting and locks the table so no other users can join
      */
-    start_draft(cube_data) {
-        if (load_cube(cube_data).ok) {
+     start_draft(cube_data) {
+        let import_result = load_cube(cube_data);
+        if (import_result.ok) {
+            console.log(import_result.cardArray);
             this.pack_count = 0;
             this.curr_pack_set = 0;
             this.returned = 0;
             this.state = DRAFTING;
             this.tobj.lock();
             this.num_users = this.tobj.users.length;
+        } else {
+            console.log(import_result.error);
         }
     }
 

@@ -8,13 +8,13 @@ exports.load_cube = function(cubeData) {
     let num = 0;
     let cardName = '';
     let cardArray = [];
-    for(elem in strArray){
-        num = elem.slice(0, elem.indexOf(' ')-1);
+    for(elem of strArray){
+        num = elem.slice(0, elem.indexOf(' '));
         num = parseInt(num, 10);
-        if(num == NaN){
+        if(isNaN(num)){
             return { ok: false, error: "String " + elem + " is not an acceptable input." }
         }
-        cardName = elem.slice(elem.indexOf(' ')+1, elem.length - 1);
+        cardName = elem.slice(elem.indexOf(' ')+1, elem.length);
         cardArray.push({num, cardName});
     }
 
