@@ -60,6 +60,20 @@ function colorCheck(colorConsistency, colorIdentity){
     return colorConsistency;
 }
 
+exports.getCube = async function (cardArray, numPacks, numCards) {
+    let packArray = [];
+    for(let i = 0; i < numPacks; ++i){
+        let pack = [];
+        for(let j = 0; j < numCards; ++j){
+            let cardName = cardArray[Math.floor(Math.random()*cardArray.length)];
+            pack.push(await getCard("https://api.scryfall.com/cards/named?" + encodeURIComponent(cardName)));
+        }
+        packArray.push(pack);
+        pack = [];
+    }
+    return packArray;
+}
+
 exports.getPack = async function () {
     let pack = [];
     let colorConsistency = { W: 0, U: 0, B: 0, R: 0, G: 0, M: 0 };
