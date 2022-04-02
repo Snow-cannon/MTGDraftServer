@@ -203,6 +203,7 @@ function addCard(cardData, cropPercentage) {
         // add the shape to the cardLayer
         cardLayer.add(card);
         cards.push(card);
+        fillZonesByColor()
     }
     imageObj.src = cardData.img;
 }
@@ -313,7 +314,7 @@ document.getElementById('tap-button').addEventListener('click', () => {
     }
 });
 
-document.getElementById('fill-button').addEventListener('click', () => {
+function fillZonesByColor(){
     let zoneColorDistr = ['W', 'U', 'B', 'R', 'G'];
     pickupCards(cards);
     let deckBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'deck') return x; });
@@ -335,6 +336,10 @@ document.getElementById('fill-button').addEventListener('click', () => {
         }
     }
     relayerCardZones();
+}
+
+document.getElementById('fill-button').addEventListener('click', () => {
+    fillZonesByColor();
 });
 
 document.getElementById('side-board-button').addEventListener('click', () => {
@@ -450,6 +455,25 @@ stage.on('mouseup', function (event) {
         //Hide selection rectangle
         selectRect.visible(false);
         mouseDown = false;
+    }
+});
+
+stage.on('wheel', function(e){
+    e.evt.preventDefault();
+    let pointer = stage.getPointerPosition();
+    let directionUp = e.evt.deltaY > 0 ? true : false;
+    for(const zone of cardZoneRects){
+        if(pointer.x > zone.rect.x && pointer.x < zone.rect.x + zone.rect.width && pointer.y > zone.rect.y && pointer.y < zone.rect.y + zone.rect.height){
+            if(direction === 1){
+                let lastCard = zone.cards.pop();
+                zone.cards.unshift(lastCard);
+            }
+            else{
+                let lastCard = zone.cards.shift();
+                zone.cards.push(lastCard);
+            }
+            relayerCardZones();
+        }
     }
 });
 
