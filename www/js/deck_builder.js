@@ -536,10 +536,6 @@ function initDeckFromLS() {
     showPopup = false;
 }
 
-export function getCardsByParentZone(zoneName) {
-    return cardZoneRects.filter((x) => { if (x.parent_id === zoneName) return x; }).reduce((x, a) => { return x.concat(a.cards) }, []);
-}
-
 
 const whiteLands = document.getElementById('white-lands');
 const blueLands = document.getElementById('blue-lands');
@@ -574,7 +570,14 @@ function updateNumCardsInDeck(){
 
 window.onload = () => initDeckFromLS();
 
+function getCardsByParentZone(zoneName) {
+    return cardZoneRects.filter((x) => { if (x.parent_id === zoneName) return x; }).reduce((x, a) => { return x.concat(a.cards) }, []);
+}
 
+document.getElementById('finished-building').addEventListener('click', function(event){
+    ls.setItem('deckObj', JSON.stringify({deck:getCardsByParentZone('deck').map(a => a.getAttr('data')), sideBoard: getCardsByParentZone('side-board').map(a => a.getAttr('data')), commandZone: getCardsByParentZone('specialty-board').map(a => a.getAttr('data'))}));
+    console.log(ls.getItem('deckObj'));
+});
 
 
 
