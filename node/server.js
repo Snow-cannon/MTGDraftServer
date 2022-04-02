@@ -82,7 +82,7 @@ function js_root() {
 app.get('/', (req, res) => {
 
     //Set the main game path
-    var pp = path.join(www_root(), 'html', 'waiting_room.html');
+    let pp = path.join(www_root(), 'html', 'waiting_room.html');
 
     //Create cookie reset functions
 
@@ -147,7 +147,9 @@ app.get('/', (req, res) => {
                 req.session.table_id = table_id;
 
                 if (tables.get_table(table_id).get_game_state() === 'drafting') {
-                    var pp = path.join(www_root(), 'html', 'draft_room.html');
+                    pp = path.join(www_root(), 'html', 'draft_room.html');
+                } else if(tables.get_table(table_id).get_game_state() === 'building'){
+                    pp = path.join(www_root(), 'html', 'deck_builder.html');
                 }
             }
         }

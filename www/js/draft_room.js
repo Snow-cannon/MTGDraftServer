@@ -24,6 +24,10 @@ socket.on('get_load_count', function (data) {
     getNumLoadedPacks();
 });
 
+socket.on('reload', function (data) { //Force a page reload
+    location.reload();
+});
+
 //Emit 'ping' to notify the server you are requesting a game emission
 socket.emit('ping', 'request_hand');
 

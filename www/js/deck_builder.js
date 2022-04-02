@@ -573,14 +573,3 @@ function updateNumCardsInDeck(){
 }
 
 window.onload = () => initDeckFromLS();
-
-
-
-
-
-
-
-
-
-
-
