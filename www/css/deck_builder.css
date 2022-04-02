@@ -1,0 +1,118 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: blanchedalmond;
+  }
+
+
+
+  #menu {
+    display: none;
+    position: absolute;
+    width: 100px;
+    background-color: white;
+    box-shadow: 0 0 5px grey;
+    border-radius: 3px;
+  }
+
+  #menu button {
+    width: 100%;
+    background-color: white;
+    border: none;
+    margin: 0;
+    padding: 10px;
+  }
+
+  #menu button:hover {
+    background-color: lightgray;
+  }
+
+
+.card-zone {
+  background-color: aliceblue;
+  border: 2px black solid;
+}
+
+#container {
+  background-color: transparent;
+}
+
+#card-containers{
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 72% 1fr 12% 1fr 12% 1fr ;
+  grid-template-rows: 3% 45% 1fr 45% 1fr;
+}
+
+#deck{
+  grid-row-start: 2;
+  grid-row-end: 5;
+  grid-column-start: 2;
+  grid-column-end: 3;
+  display: grid;
+  grid-template-columns: repeat(1fr, 6);
+  width: 100%;
+  height: 100%;
+}
+
+.sub-card-zone{
+  grid-row: 1;
+  height: 100%;
+  width: 100%;
+}
+
+.lands{
+  text-align: center;
+  width: 99%;
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row: 1;
+  border: 2px solid black;
+  background-color: lightblue;
+  padding: .5%;
+}
+
+input[type="number"]{
+  width: 5%;
+}
+
+#specialty-board{
+  grid-row-start: 2;
+  grid-row-end: 5;
+  grid-column: 4;
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+#side-board{
+  grid-row-start: 2;
+  grid-row-end:5;
+  grid-column-start: 6;
+  grid-column-end: 7;
+  width: 100%;
+  height: 100%;
+}
+
+
+#command-zone-name{
+  grid-row: 1;
+  grid-column: 4;
+  text-align: center;
+  font-size: 200%;
+}
+
+#side-board-name{
+  grid-row: 1;
+  grid-column: 6;
+  text-align: center;
+  font-size: 200%;
+}
+

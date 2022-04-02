@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+    <link href="../css/deck_builder.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="card-containers">  
+        <div class="card-zone" id="deck">
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="specialty-board">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div id="command-zone-name">Command Zone:</div> 
+        <div class="card-zone" id="side-board">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div id="side-board-name">Sideboard:</div> 
+        <div id="container"></div>
+        <div class="lands">
+            <label for="white-lands">White Lands:</label>
+            <input type="number" id="white-lands" name="white-lands" min="0">
+            <label for="blue-lands">Blue Lands:</label>
+            <input type="number" id="blue-lands" name="blue-lands" min="0">
+            <label for="black-lands">Black Lands:</label>
+            <input type="number" id="black-lands" name="black-lands" min="0">
+            <label for="red-lands">Red Lands:</label>
+            <input type="number" id="red-lands" name="red-lands" min="0">
+            <label for="green-lands">Green Lands:</label>
+            <input type="number" id="green-lands" name="green-lands" min="0">
+            <span id="card-count">Total Cards In Deck:</span>
+        </div> 
+    </div>
+    <div id="menu">
+        <div>
+            <button id="tap-button">Tap</button>
+            <button id="fill-button">Fill Zones</button>
+            <button id="side-board-button">Move All to Sideboard</button>
+            <button id="sort-zone">Sort Deck By CMC</button>
+        </div>
+    </div>
+
+    <script src="../js/deck_builder.js" type="module"></script>
+</body>
+
+</html>
+
