@@ -464,7 +464,7 @@ stage.on('wheel', function(e){
     let directionUp = e.evt.deltaY > 0 ? true : false;
     for(const zone of cardZoneRects){
         if(pointer.x > zone.rect.x && pointer.x < zone.rect.x + zone.rect.width && pointer.y > zone.rect.y && pointer.y < zone.rect.y + zone.rect.height){
-            if(direction === 1){
+            if(directionUp){
                 let lastCard = zone.cards.pop();
                 zone.cards.unshift(lastCard);
             }
