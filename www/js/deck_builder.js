@@ -115,13 +115,15 @@ function addCard(cardData, cropPercentage) {
             width: imageObj.width,
             height: imageObj.height,
         });
-        popup.height(scale * 7);
-        popup.width(scale * 5);
+        popup.height(scale * 3.5 * 1.25);
+        popup.width(scale * 2.5 * 1.25);
         popup.visible(false);
 
         //When you mouse over the card, show the popup inside the window
         card.on('mouseenter', (e) => {
-            if (!showPopup) { return }
+            // card.setZIndex(card.getParent().getChildren().length);
+            console.log(keyDownObject);
+            if (!showPopup || !keyDownObject['Control']) { return }
             if (card.x() + card.width() + popup.width() > window.innerWidth) {
                 popup.x(card.x() - popup.width());
             }
@@ -463,7 +465,7 @@ stage.on('wheel', function(e){
     let pointer = stage.getPointerPosition();
     let directionUp = e.evt.deltaY > 0 ? true : false;
     for(const zone of cardZoneRects){
-        if(pointer.x > zone.rect.x && pointer.x < zone.rect.x + zone.rect.width && pointer.y > zone.rect.y && pointer.y < zone.rect.y + zone.rect.height){
+        if(pointer.x > zone.rect.x && pointer.x < zone.rect.x + zone.rect.width && pointer.y > zone.rect.y - stageTop() && pointer.y < zone.rect.y + zone.rect.height - stageTop()){
             if(directionUp){
                 let lastCard = zone.cards.pop();
                 zone.cards.unshift(lastCard);
