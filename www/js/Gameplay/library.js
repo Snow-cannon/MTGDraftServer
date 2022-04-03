@@ -61,7 +61,12 @@ export class observer {
     }
     update() {
         for (const sub of this.subscribers) {
-            sub();
+            try{
+                sub();
+            }
+            catch(e){
+                console.log(e);
+            }
         }
     }
 }

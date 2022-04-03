@@ -53,7 +53,7 @@ export async function getState() {
 
     let strdat = JSON.stringify(data);
 
-    fetch(name, {
+    await fetch(name, {
         method: "post",
         body: strdat,
         headers: { 'Content-Type': 'application/json' }
