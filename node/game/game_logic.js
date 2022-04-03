@@ -318,7 +318,7 @@ exports.Game_Logic = class {
                 return 'draft_room.html';
 
             case PLAYING:
-                return 'play_area.html';
+                return 'pre_play_room.html';
 
             case BUILDING:
                 return 'deck_builder.html';
