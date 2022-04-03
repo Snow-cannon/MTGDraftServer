@@ -518,7 +518,6 @@ function relayerCardZones() {
         zone.cards.forEach((a, i) => {
             if(zone.id == 'opp-zone'){
                 let extraHeight = (zone.cards.length-1) * yOffset() - zone.rect.height + a.height();
-                console.log(extraHeight);
                 if(extraHeight <= 0){
                     a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
                 }
@@ -980,7 +979,6 @@ function reloadZone(board, stateboard){
         let length = zone.cards.length;
         for (let i = 0; i < length; ++i) {
             let card = zone.cards.pop();
-            console.log(zone.cards);
             removeCard(card);
         }
         for (let i = 0; i < stateboard[stateboard.length - j -1].cards.length; ++i) {
