@@ -487,7 +487,7 @@ function dropCards(baseCard, cards) {
     }
     if (targetZone != undefined) {
         for (let card of cards) {
-            targetZone.cards.unshift(card);
+            (targetZone.id == 'stack') ? targetZone.cards.push(card) : targetZone.cards.unshift(card);
         }
     }
     relayerCardZones();
@@ -514,16 +514,27 @@ function pickupCards(cards) {
  */
 function relayerCardZones() {
     for (let zone of cardZoneRects) {
-        let zindex = cardLayer.children.length-1;
+        let zindex = (zone.id == 'stack') ? 0 : cardLayer.children.length-1;
         zone.cards.forEach((a, i) => {
             if(zone.id == 'opp-zone'){
-                a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+                let extraHeight = (zone.cards.length-1) * yOffset() - zone.rect.height + a.height();
+                console.log(extraHeight);
+                if(extraHeight <= 0){
+                    a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+                }
+                else{
+                    a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset() - extraHeight);
+                }
                 if(a.rotation() != 90){
                     a.rotation(180);
                 }
             }
             else if(zone.id == 'neutral-zone'){
                 a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+            }
+            else if(zone.id == 'stack'){
+                a.y(zone.rect.y  - stageTop() + a.height() / 2 + i * yOffset());
+                a.rotation(0);
             }
             else{
                 a.y(zone.rect.y  + zone.rect.height- stageTop() - a.height() / 2 - i * yOffset());
@@ -534,7 +545,13 @@ function relayerCardZones() {
             a.x(zone.rect.x + (zone.rect.width - a.width() )/2  + a.width() / 2);
             a.setZIndex(zindex);
             relayerCounters(a);
-            if (a.getAttr('counters').length > 0) {
+            if(zone.id == 'stack' && a.getAttr('counters').length > 0){
+                zindex += a.getAttr('counters').length + 1;
+            }
+            else if(zone.id == 'stack'){
+                zindex ++;
+            }
+            else if (a.getAttr('counters').length > 0) {
                 zindex -= a.getAttr('counters').length + 1;
             }
             else {
