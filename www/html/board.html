@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+    <link href="board.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="card-containers">
+        <div class="card-zone" id="hand">
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="play-area">
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="stack">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="discard">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="library">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="exile">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div class="card-zone" id="opp-discard">
+            <div class="sub-card-zone"></div>
+        </div>
+        <div id="container"></div>
+    </div>
+    <div class="menu" id="menu">
+        <div>
+            <button id="tap-button">Tap</button>
+            <button id="add-counter">Add a Counter</button>
+            <button id="flip-card">Flip card</button>
+            <button id="transform-card">Transform card</button>
+            <button id="library-top">Put on top of library</button>
+            <button id="library-bottom">Put on bottom of library</button>
+        </div>
+    </div>
+    <div class="menu" id="counter-menu">
+        <div>
+            <button id="remove-counter">Remove Counter</button>
+        </div>
+    </div>
+    <div class="menu" id="library-menu">
+        <div>
+            <button id="draw-button">Draw a Card</button>
+            <button id="token-button">Create a token</button>
+            <button id="look-button">Look at library</button>
+            <button id="shuffle-library">Shuffle</button>
+            <button id="load-state">Load State</button>
+        </div>
+    </div>
+
+    <script src="game.js" type="module"></script>
+</body>
+
+</html>
