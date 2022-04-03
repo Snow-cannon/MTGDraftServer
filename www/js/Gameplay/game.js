@@ -49,7 +49,7 @@ let cardZoneRects = [];
 
 //Process the zones and get the rectangles. The object also stores the cards in the rectangles and a referenece to the parent div ID
 for (let zone of cardZones) {
-    cardZoneRects.push({ rect: zone.getBoundingClientRect(), cards: [], parent_id: zone.parentElement.id });
+    cardZoneRects.push({ rect: zone.getBoundingClientRect(), cards: [], parent_id: zone.parentElement.id, id:zone.id });
 }
 
 //When the window resizes, resize all of the cards to fit(roughly)
@@ -75,7 +75,7 @@ document.addEventListener('keydown', (event) => {
     // Alert the key name and key code on keydown
     keyDownObject[name] = true;
     if (name === "p") {
-        console.log(exportState());
+        (exportState());
     }
 }, false);
 document.addEventListener('keyup', (event) => {
@@ -112,7 +112,6 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
             flipBool: false,
             counters: [],
         });
-        console.log(card.getAttr('counters'));
         //Crop the image to to the desired height
         card.crop({
             x: 0,
@@ -130,6 +129,7 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
         });
         popup.height(scale * 7);
         popup.width(scale * 5);
+        popup.rotation(0);
         popup.visible(false);
 
         card.resize = () => {
@@ -207,6 +207,9 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
                         c1.x(card.x());
                         c1.y(card.y() + (i - selectArr.indexOf(card)) * yOffset());
                     }
+                    if(c1.rotation() != 90){
+                        c1.rotation(0);
+                    }
                     relayerCounters(c1);
                     //Set the z-index in selection order(same as old zone)
                     c1.zIndex(cards.length - selectArr.length + i);
@@ -229,7 +232,6 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
             relayerCardZones();
             clearSelected();
             exportState();
-            stage.batchDraw();
         });
         card.on('contextmenu', function (e) {
             // prevent default behavior
@@ -324,7 +326,6 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
         }
 
         card.add = (counter) => {
-            console.log(card.getAttr('counters'));
             card.getAttr('counters').push(counter);
             relayerCounters(card);
 
@@ -333,7 +334,7 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
             card.getAttr('counters').splice(card.getAttr('counters').indexOf(counter), 1);
             relayerCounters(card);
         }
-        counters.forEach((x) => {console.log(JSON.parse(x)); addCounter(card, JSON.parse(x)['children'][1]['attrs']['text'])});
+        counters.forEach((x) => {addCounter(card, JSON.parse(x)['children'][1]['attrs']['text'])});
         // add the shape to the cardLayer
         zone.cards.push(card);
         cardLayer.add(card);
@@ -486,7 +487,7 @@ function dropCards(baseCard, cards) {
     }
     if (targetZone != undefined) {
         for (let card of cards) {
-            targetZone.cards.push(card);
+            targetZone.cards.unshift(card);
         }
     }
     relayerCardZones();
@@ -513,17 +514,31 @@ function pickupCards(cards) {
  */
 function relayerCardZones() {
     for (let zone of cardZoneRects) {
-        let zindex = 0;
+        let zindex = cardLayer.children.length-1;
         zone.cards.forEach((a, i) => {
-            a.x(zone.rect.x + a.width() / 2);
-            a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+            if(zone.id == 'opp-zone'){
+                a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+                if(a.rotation() != 90){
+                    a.rotation(180);
+                }
+            }
+            else if(zone.id == 'neutral-zone'){
+                a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+            }
+            else{
+                a.y(zone.rect.y  + zone.rect.height- stageTop() - a.height() / 2 - i * yOffset());
+                if(a.rotation() != 90){
+                    a.rotation(0);
+                }
+            }
+            a.x(zone.rect.x + (zone.rect.width - a.width() )/2  + a.width() / 2);
             a.setZIndex(zindex);
             relayerCounters(a);
             if (a.getAttr('counters').length > 0) {
-                zindex += a.getAttr('counters').length + 1;
+                zindex -= a.getAttr('counters').length + 1;
             }
             else {
-                zindex++;
+                zindex--;
             }
 
         });
@@ -572,6 +587,7 @@ document.getElementById('tap-button').addEventListener('click', () => {
             currentShape.rotation(90);
         }
     }
+    relayerCardZones();
     exportState();
 });
 
@@ -776,8 +792,8 @@ function hitCheck(shape1, card) {
     // corners of shape 2
     let X1 = s2.x;
     let A1 = s2.x + s2.width;
-    let Y1 = s2.y;
-    let B1 = s2.y + yOffset(); //This checks if the rect covers the space near the top of the card specifically
+    let Y1 = (card.rotation() == 180)? s2.y + s2.height : s2.y;
+    let B1 = (card.rotation() == 180)? s2.y + s2.height - yOffset() : s2.y + yOffset(); //This checks if the rect covers the space near the top of the card specifically
     // Simple overlapping rect collision test
     if (A < X1 || A1 < X || B < Y1 || B1 < Y) {
         return false
@@ -944,14 +960,16 @@ async function exportState() {
 function reloadZone(board, stateboard){
     for (let j = 0; j < board.length; ++j) {
         let zone = board[j];
-        for (let i = 0; i < zone.cards.length; ++i) {
-            let card = zone.cards[i];
+        let length = zone.cards.length;
+        for (let i = 0; i < length; ++i) {
+            let card = zone.cards.pop();
+            console.log(zone.cards);
             removeCard(card);
         }
         for (let i = 0; i < stateboard[stateboard.length - j -1].cards.length; ++i) {
             let card = JSON.parse(stateboard[stateboard.length - j -1].cards[i]);
-            console.log(card);
-            addCard(card['attrs']['data'], 10 / 16, zone, card['attrs']['rotation'], card['attrs']['flipBool'], card['attrs']['transformBool'], JSON.parse(card['attrs']['counters']));
+            let rotation = (card['attrs']['rotation'] != 90)? ((card['attrs']['rotation'] ==180)? 0 : 180) : 90; 
+            addCard(card['attrs']['data'], 10 / 16, zone, rotation, card['attrs']['flipBool'], card['attrs']['transformBool'], JSON.parse(card['attrs']['counters']));
 
         }
     }

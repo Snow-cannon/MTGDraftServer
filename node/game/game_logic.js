@@ -29,8 +29,8 @@ exports.Game_Logic = class {
         this.pack_count = 0;
         this.curr_pack_set = 0;
         this.returned_packs = [];
-        this.pack_rounds = 1;
-        this.pack_size = 3;
+        this.pack_rounds = 3;
+        this.pack_size = 5;
         this.num_users = 4;
         this.packs = [];
 
