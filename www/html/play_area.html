@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Waiting Room</title>
+    <link href="../css/basic.css" rel="stylesheet">
+    <link href="../css/waiting_room.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div id="center">
+        <!-- This will hold a table of usernames so the host can know when everyone is in -->
+        <h4 id="table_title">Users</h4>
+        <table id="user_table">
+
+        </table>
+            <tr>
+                <td>
+                    <p id="table_id"></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script type="module" src="../js/play_area.js"></script>
+</body>

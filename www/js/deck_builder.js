@@ -601,13 +601,42 @@ function getCardsByParentZone(zoneName) {
 document.getElementById('finished-building').addEventListener('click', function(event){
     ls.setItem('deckObj', JSON.stringify({deck:getCardsByParentZone('deck').map(a => a.getAttr('data')), sideBoard: getCardsByParentZone('side-board').map(a => a.getAttr('data')), commandZone: getCardsByParentZone('specialty-board').map(a => a.getAttr('data'))}));
     console.log(ls.getItem('deckObj'));
+    notifyCompletion();
 });
 
 
+//--------------------------------------------------------------
+// 
+// 
+// 
+//          Server Connection Stuffs
+// 
+// 
+// 
+//--------------------------------------------------------------
 
 
+const socket = io();
 
+socket.on('reload', function (data) { //Force a page reload
+    location.reload();
+});
 
+async function notifyCompletion () {
+    let name = '__request';
+    let data = {
+        command: 'game_request',
+        game: {
+            request: 'complete_building',
+            params: {}
+        }
+    };
 
+    let strdat = JSON.stringify(data);
 
-
+    let result = await fetch(name, {
+        method: "post",
+        body: strdat,
+        headers: { 'Content-Type': 'application/json' }
+    });
+}

@@ -6,7 +6,8 @@ const { createPacks, getPack, getCube } = require('./pack_control.js');
 const { load_cube } = require('./cube_import.js');
 const WAITING = 'waiting',
     DRAFTING = 'drafting',
-    BUILDING = 'building';
+    BUILDING = 'building',
+    PLAYING = 'playing';
 
 /**
  * Holds all connection to the 
@@ -21,18 +22,30 @@ exports.Game_Logic = class {
         //Basic game data
         this.tobj = table;
         this.state = WAITING;
+        this.users = () => this.tobj.users;
 
+        //Drafting
         this.pack_count = 0;
         this.curr_pack_set = 0;
-        this.returned = 0;
-        this.pack_rounds = 3;
-
+        this.returned_packs = [];
+        this.pack_rounds = 1;
+        this.pack_size = 1;
         this.num_users = 4;
         this.packs = [];
 
+        //Deck Building
+        this.returned_decks = [];
+
+        //Activate below for random packs
         // this.get_packs();
+
+        //Playing
+        this.sub_tables = [];
     }
 
+    /**
+     * Calls getPack enough times to collect a set of cards for each pack for each player
+     */
     async get_packs() {
         for (let i = 0; i < this.num_users * this.pack_rounds; ++i) {
             let response = await getPack();
@@ -69,6 +82,44 @@ exports.Game_Logic = class {
     }
 
     /**
+     * Sends a notification to all table users that they can get their cards
+     */
+    force_user_reload() {
+        this.tobj.notify_all('reload');
+    }
+
+    //Notifies both parties of the table
+    notify_sub_table(uobj, cmd, msg) {
+        let u1 = this.sub_tables[this.get_sub_table(uobj)].u1
+        let u2 = this.sub_tables[this.get_sub_table(uobj)].u2
+        this.users()[u1].notify_self(cmd, msg);
+        this.users()[u2].notify_self(cmd, msg);
+    }
+
+    //Notifies the other person in the table
+    notify_other_table_participant(uobj, cmd, msg){
+        let table = this.sub_tables[this.get_sub_table(uobj)];
+        let selfID = thie.get_relative_user_id(uobj);
+        if(table.u1 === selfID){
+            this.users()[table.u2].notify_self(cmd, msg);
+        } else {
+            this.users()[table.u1].notify_self(cmd, msg);
+        }
+    }
+
+    get_sub_table(uobj) {
+        let id = uobj.get_relative_user_id(uobj);
+        for (let i = 0; i < this.sub_tables.length; ++i) {
+            let table = this.sub_tables[i]
+            if (table.u1 === id || table.u2 === id) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
      * Sets the draft state to Drafting and locks the table so no other users can join
      */
     start_draft(cube_data) {
@@ -76,20 +127,59 @@ exports.Game_Logic = class {
         if (import_result.ok) {
             this.pack_count = 0;
             this.curr_pack_set = 0;
-            this.returned = 0;
             this.state = DRAFTING;
-            this.tobj.lock();
             this.num_users = this.tobj.users.length;
-            this.packs = this.get_cube(import_result.cardArray, this.num_users * this.pack_rounds, 15);
+            this.packs = this.get_cube(import_result.cardArray, this.num_users * this.pack_rounds, this.pack_size);
+            for (let i = 0; i < this.num_users; ++i) { this.returned_decks.push(false); } //Populate the returned-deck array with false
+            for (let i = 0; i < this.num_users; ++i) { this.returned_packs.push(false); } //Populate the returned-pack array with false
+            this.tobj.lock();
         } else {
             console.log(import_result.error);
         }
     }
 
-    // reduce_num_packs(pack_set) {
-    //     this.packs[pack_set] = this.packs[pack_set].slice(0, this.num_users);
-    //     log('reduce_num_packs', 'deleting extras', { packs: this.packs[pack_set].length });
-    // }
+    /**
+     * Initializes the gameplay, creates subtables, and reloads players screens
+     */
+    start_gameplay() {
+        this.state = PLAYING;
+        let table_count = this.num_users - (this.num_users % 2);
+        for (let i = 0; i < table_count; ++i) {
+            this.make_table(this.users()[i * 2], this.users()[(i * 2) + 1]);
+            console.log(this.sub_tables);
+        }
+        this.force_user_reload();
+    }
+
+    make_table(uobj1, uobj2) {
+        let id1 = this.get_relative_user_id(uobj1);
+        let id2 = this.get_relative_user_id(uobj2);
+        for (let i = 0; i < this.sub_tables.length; ++i) {
+            let table = this.sub_tables[i];
+            if (table.u1 === id1 || table.u2 === id1 || table.u1 === id2 || table.u2 === id2) {
+                return { ok: false };
+            }
+        }
+
+        this.sub_tables.push({ u1: id1, u2: id2, data: {} });
+        return { ok: true, table_id: this.sub_tables.length }
+    }
+
+    remove_table(table_id) {
+        if (this.sub_tables.length < table_id) {
+            let removed = {
+                ok: true,
+                table_id: table_id,
+                user1: this.sub_tables[table_id].u1,
+                user2: this.sub_tables[table_id].u2,
+                data: this.sub_tables[table_id].data
+            };
+            this.sub_tables.splice(table_id, 1);
+            return removed;
+        } else {
+            return { ok: false }
+        }
+    }
 
     /**
      * Gets quick data from the server
@@ -121,16 +211,16 @@ exports.Game_Logic = class {
         switch (request) {
             case 'update_user_pack':
                 this.packs[data.pack.id] = shuffle(data.pack.cards);
-                this.returned++;
-                if (this.returned >= this.num_users) {
-                    this.returned = 0;
+                this.returned_packs[this.get_relative_user_id(uobj)] = true;
+                if (!this.returned_packs.includes(false)) {
+                    this.returned_packs = 0;
                     if (data.pack.cards.length === 0) {
                         this.pack_count = 0;
                         this.curr_pack_set++;
                         console.log(this.curr_pack_set);
                         if (this.curr_pack_set >= this.pack_rounds) {
                             this.state = BUILDING;
-                            this.tobj.notify_all('reload');
+                            this.force_user_reload();
                         }
                     } else {
                         this.pack_count = (this.pack_count + 1) % this.num_users;
@@ -152,15 +242,14 @@ exports.Game_Logic = class {
                     //If the current set is even
                     if ((this.curr_pack_set % 2) == 0) {
                         //Index to the right in the pack array
-                        id = modulo((this.get_user_table_id(uobj) + this.pack_count), this.num_users) + (this.curr_pack_set * this.num_users);
-                    }
-                    else {
+                        id = modulo((this.get_relative_user_id(uobj) + this.pack_count), this.num_users) + (this.curr_pack_set * this.num_users);
+                    } else {
                         //Index to the left in the pack array
-                        id = modulo((this.pack_count - this.get_user_table_id(uobj)), this.num_users) + (this.curr_pack_set * this.num_users);
+                        id = modulo((this.pack_count - this.get_relative_user_id(uobj)), this.num_users) + (this.curr_pack_set * this.num_users);
                     }
                     return { ok: true, pack: { id: id, cards: this.packs[id] } }
                 } else {
-                    return { ok: false }
+                    return { ok: false };
                 }
             case 'get_state':
                 return { ok: true, state: this.state };
@@ -183,6 +272,23 @@ exports.Game_Logic = class {
                 let ret_data = this.tobj.users.map(uobj => { return { name: uobj.display_name, id: uobj.id } });
                 return { ok: true, data: ret_data };
 
+            case 'complete_building':
+                this.returned_decks[this.get_relative_user_id(uobj)] = true;
+                if (!this.returned_decks.includes(false)) {
+                    this.start_gameplay();
+                }
+                return { ok: true };
+
+            case 'get_table_id':
+                let user_id = this.get_relative_user_id(uobj);
+                for (let i = 0; i < this.sub_tables.length; ++i) {
+                    if (this.sub_tables[i].includes(user_id)) {
+                        return { ok: true, table_id: i };
+                    }
+                }
+
+                return { ok: false };
+
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
                 return { ok: false };
@@ -194,8 +300,35 @@ exports.Game_Logic = class {
      * Returns an ID that is referencing the users position in the table user array
      * @param {User} uobj 
      */
-    get_user_table_id(uobj) {
-        return this.tobj.users.indexOf(uobj);
+    get_relative_user_id(uobj) {
+        return this.users().indexOf(uobj);
+    }
+
+
+
+
+
+
+
+
+
+    get_game_html() {
+        switch (this.state){
+            case DRAFTING:
+                return 'draft_room.html';
+
+            case PLAYING:
+                return 'play_area.html';
+
+            case BUILDING:
+                return 'deck_builder.html';
+
+            case WAITING:
+                return 'waiting_room.html';
+
+                default:
+                return 'waiting_room.html';
+        }
     }
 
 }

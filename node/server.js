@@ -146,11 +146,7 @@ app.get('/', (req, res) => {
                 req.session.user_id = user_id;
                 req.session.table_id = table_id;
 
-                if (tables.get_table(table_id).get_game_state() === 'drafting') {
-                    pp = path.join(www_root(), 'html', 'draft_room.html');
-                } else if(tables.get_table(table_id).get_game_state() === 'building'){
-                    pp = path.join(www_root(), 'html', 'deck_builder.html');
-                }
+                pp = path.join(www_root(), 'html', tables.get_table(table_id).game_state.get_game_html());
             }
         }
     }
