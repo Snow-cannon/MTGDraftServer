@@ -4,14 +4,19 @@ import * as cookie from './cookie.js';
 
 const socket = io();
 
+//Set up buttons
+let startButton = document.getElementById('start');
+startButton.onclick = startGame;
+
+
 //Set up name table
 let userTable = document.getElementById('user_table');
 
 //Set up table_id
 let tableIdElem = document.getElementById('table_id');
 let tableId = '...';
-getTableID();
 tableIdElem.innerText = 'Table: ' + tableId; //Display the table ID
+getTableID();
 
 //Set up socket listeners
 socket.on('log', function (data) { //Log server data
@@ -23,9 +28,11 @@ socket.on('reload', function (data) { //Force a page reload
 });
 
 socket.on('make_host', function (data) { //Set yourself to be the host
+    startButton.style.display = 'inline';
 });
 
 socket.on('revoke_host', function (data) { //Set yourself as a basic player
+    startButton.style.display = 'none';
 });
 
 socket.on('user_joined', function (data) { //Add to the user table
@@ -45,7 +52,7 @@ socket.emit('am_host');
 getUsernames(); //Fill the username table with current users
 
 
-async function getUsernames() {
+function getUsernames() {
 
     let name = '__request';
     let data = {
@@ -83,8 +90,7 @@ async function getUsernames() {
 
 }
 
-
-async function getTableID() {
+function getTableID() {
 
     let name = '__request';
     let data = {
@@ -112,9 +118,6 @@ async function getTableID() {
             if (data.ok) {
                 tableId = data.table_id;
                 tableIdElem.innerText = 'Table: ' + tableId; //Display the table ID
-            } else {
-                tableId = -1;
-                tableIdElem.innerText = 'Table: ' + tableId; //Display the table ID
             }
         });
 
@@ -137,4 +140,24 @@ function removeUserFromTable(id) {
         elem.remove();
         elem = document.getElementById('user_id:' + id);
     }
+}
+
+function startGame() {
+
+    let name = '__request';
+    let data = {
+        command: 'game_request',
+        game: {
+            request: 'start_matches',
+            params: {}
+        }
+    };
+
+    let strdat = JSON.stringify(data);
+
+    fetch(name, {
+        method: "post",
+        body: strdat,
+        headers: { 'Content-Type': 'application/json' }
+    });
 }

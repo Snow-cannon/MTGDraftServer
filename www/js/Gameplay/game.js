@@ -1,6 +1,8 @@
 import * as library from "./library.js"
 import * as serverInterface from "./gameServerInterface.js"
 
+const mtgCardBack = './imgs/MTGCardBack.jpg';
+
 const numCardsInDeck = document.getElementById('card-count');
 let resizeClosure = new library.observer();
 
@@ -301,7 +303,7 @@ function addCard(cardData, cropPercentage, zone) {
                     card.image(imageObj2);
                     popup.image(imageObj2);
                 };
-                imageObj2.src = "./MTGCardBack.jpg";
+                imageObj2.src = mtgCardBack;
             }
             else {
                 let imageObj2 = new Image();
@@ -852,7 +854,7 @@ function initGame() {
         bottomLayer.add(libraryImg);
         libraryImg.setZIndex(0);
     }
-    imageObj.src = "./MTGCardBack.jpg";
+    imageObj.src = mtgCardBack;
 }
 
 document.getElementById('draw-button').addEventListener('click', function (e) {
@@ -866,7 +868,7 @@ document.getElementById('token-button').addEventListener('click', function (e) {
     let deckBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'hand') return x; });
     let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
     let zone = (emptyHand !== undefined) ? emptyHand : deckBoard[deckBoard.length - 1];
-    addCard({ img: "./MTGCardBack.jpg" }, 10 / 16, zone);
+    addCard({ img: mtgCardBack }, 10 / 16, zone);
 });
 
 document.getElementById('look-button').addEventListener('click', function (e) {
@@ -932,20 +934,3 @@ export function importState(state) {
 
 
 window.onresize = () => resizeClosure.update();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

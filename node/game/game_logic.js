@@ -7,7 +7,8 @@ const { load_cube } = require('./cube_import.js');
 const WAITING = 'waiting',
     DRAFTING = 'drafting',
     BUILDING = 'building',
-    PLAYING = 'playing';
+    PLAYING = 'playing',
+    PLAY_WAIT = 'play_wait';
 
 /**
  * Holds all connection to the 
@@ -29,7 +30,7 @@ exports.Game_Logic = class {
         this.curr_pack_set = 0;
         this.returned_packs = [];
         this.pack_rounds = 1;
-        this.pack_size = 1;
+        this.pack_size = 3;
         this.num_users = 4;
         this.packs = [];
 
@@ -90,25 +91,28 @@ exports.Game_Logic = class {
 
     //Notifies both parties of the table
     notify_sub_table(uobj, cmd, msg) {
-        let u1 = this.sub_tables[this.get_sub_table(uobj)].u1
-        let u2 = this.sub_tables[this.get_sub_table(uobj)].u2
+        let u1 = this.sub_tables[this.get_sub_table_id(uobj)].u1
+        let u2 = this.sub_tables[this.get_sub_table_id(uobj)].u2
         this.users()[u1].notify_self(cmd, msg);
         this.users()[u2].notify_self(cmd, msg);
     }
 
     //Notifies the other person in the table
-    notify_other_table_participant(uobj, cmd, msg){
-        let table = this.sub_tables[this.get_sub_table(uobj)];
-        let selfID = thie.get_relative_user_id(uobj);
-        if(table.u1 === selfID){
-            this.users()[table.u2].notify_self(cmd, msg);
-        } else {
-            this.users()[table.u1].notify_self(cmd, msg);
+    notify_other_table_participant(uobj, cmd, msg) {
+        let tableID = this.get_sub_table_id(uobj);
+        if (tableID >= 0) {
+            let table = this.sub_tables[tableID];
+            let selfID = this.get_relative_user_id(uobj);
+            if (table.u1 === selfID) {
+                this.users()[table.u2].notify_self(cmd, msg);
+            } else {
+                this.users()[table.u1].notify_self(cmd, msg);
+            }
         }
     }
 
-    get_sub_table(uobj) {
-        let id = uobj.get_relative_user_id(uobj);
+    get_sub_table_id(uobj) {
+        let id = this.get_relative_user_id(uobj);
         for (let i = 0; i < this.sub_tables.length; ++i) {
             let table = this.sub_tables[i]
             if (table.u1 === id || table.u2 === id) {
@@ -141,12 +145,11 @@ exports.Game_Logic = class {
     /**
      * Initializes the gameplay, creates subtables, and reloads players screens
      */
-    start_gameplay() {
-        this.state = PLAYING;
-        let table_count = this.num_users - (this.num_users % 2);
+    prepare_gameplay() {
+        this.state = PLAY_WAIT;
+        let table_count = (this.num_users - (this.num_users % 2)) / 2;
         for (let i = 0; i < table_count; ++i) {
             this.make_table(this.users()[i * 2], this.users()[(i * 2) + 1]);
-            console.log(this.sub_tables);
         }
         this.force_user_reload();
     }
@@ -208,12 +211,16 @@ exports.Game_Logic = class {
      * @param {Integer} user_id
      */
     make_request(request, data, uobj) {
+        let table;
+        let user_id;
+        let id;
+
         switch (request) {
             case 'update_user_pack':
                 this.packs[data.pack.id] = shuffle(data.pack.cards);
                 this.returned_packs[this.get_relative_user_id(uobj)] = true;
                 if (!this.returned_packs.includes(false)) {
-                    this.returned_packs = 0;
+                    this.returned_packs = this.returned_packs.map(e => false);
                     if (data.pack.cards.length === 0) {
                         this.pack_count = 0;
                         this.curr_pack_set++;
@@ -238,7 +245,6 @@ exports.Game_Logic = class {
                  * Sends a pack to the user based on the users table_id
                  */
                 if (this.is_loaded()) {
-                    let id;
                     //If the current set is even
                     if ((this.curr_pack_set % 2) == 0) {
                         //Index to the right in the pack array
@@ -275,19 +281,41 @@ exports.Game_Logic = class {
             case 'complete_building':
                 this.returned_decks[this.get_relative_user_id(uobj)] = true;
                 if (!this.returned_decks.includes(false)) {
-                    this.start_gameplay();
+                    this.prepare_gameplay();
                 }
                 return { ok: true };
 
             case 'get_table_id':
-                let user_id = this.get_relative_user_id(uobj);
+                user_id = this.get_relative_user_id(uobj);
                 for (let i = 0; i < this.sub_tables.length; ++i) {
-                    if (this.sub_tables[i].includes(user_id)) {
+                    if (this.sub_tables[i].u1 === user_id || this.sub_tables[i].u2 === user_id) {
                         return { ok: true, table_id: i };
                     }
                 }
 
                 return { ok: false };
+
+            case 'start_matches':
+                this.state = PLAYING;
+                this.force_user_reload('reload');
+
+            case 'updata_game_state':
+                table = this.get_sub_table_id(uobj);
+                if (table >= 0) {
+                    this.sub_tables[table].data = data.data;
+                    this.notify_other_table_participant(uobj, 'get_state');
+                    return { ok: true };
+                } else {
+                    return { ok: false }
+                }
+
+            case 'get_table_state':
+                table = this.get_sub_table_id(uobj);
+                if (table >= 0) {
+                    return { ok: true, data: this.sub_tables[table].data }
+                } else {
+                    return { ok: false }
+                }
 
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
@@ -313,12 +341,15 @@ exports.Game_Logic = class {
 
 
     get_game_html() {
-        switch (this.state){
+        switch (this.state) {
             case DRAFTING:
                 return 'draft_room.html';
 
-            case PLAYING:
+            case PLAY_WAIT:
                 return 'pre_play_room.html';
+
+            case PLAYING:
+                return 'board.html';
 
             case BUILDING:
                 return 'deck_builder.html';
@@ -326,7 +357,7 @@ exports.Game_Logic = class {
             case WAITING:
                 return 'waiting_room.html';
 
-                default:
+            default:
                 return 'waiting_room.html';
         }
     }
