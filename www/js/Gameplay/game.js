@@ -535,6 +535,10 @@ function relayerCardZones() {
                 a.y(zone.rect.y  - stageTop() + a.height() / 2 + i * yOffset());
                 a.rotation(0);
             }
+            else if(zone.id == 'discard-zone'){
+                a.y(zone.rect.y  - stageTop() + a.height() / 2 + i * yOffset());
+                a.rotation(0);
+            }
             else{
                 a.y(zone.rect.y  + zone.rect.height- stageTop() - a.height() / 2 - i * yOffset());
                 if(a.rotation() != 90){
