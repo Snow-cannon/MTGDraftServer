@@ -340,6 +340,7 @@ function addCard(cardData, cropPercentage, zone, rotation = 0, flipBool = false,
         zone.cards.push(card);
         cardLayer.add(card);
         cards.push(card);
+        localSaveGame();
         relayerCardZones();
     }
     if (transformBool && card.getAttr('data').back !== "") {
@@ -690,7 +691,7 @@ document.getElementById('library-top').addEventListener('click', () => {
         currentShape.destroy();
     }
     relayerCardZones();
-    exportState();
+    localSaveGame();
     cardLayer.draw();
 });
 document.getElementById('library-bottom').addEventListener('click', () => {
@@ -721,8 +722,8 @@ document.getElementById('library-bottom').addEventListener('click', () => {
         currentShape.destroy();
     }
     relayerCardZones();
+    localSaveGame();
     cardLayer.draw();
-    exportState();
 });
 
 
@@ -932,7 +933,6 @@ function initGame() {
                     let pointer = stage.getPointerPosition();
                     let direction = e.evt.deltaY > 0 ? -1 : 1;
                     label.children[1].text(parseInt(label.children[1].text()) + direction);
-                    exportState();
                 });
                 label.on('contextmenu', function (e) {
                     e.evt.preventDefault();
@@ -984,7 +984,7 @@ document.getElementById('draw-button').addEventListener('click', function (e) {
     let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
     let zone = (emptyHand !== undefined) ? emptyHand : deckBoard[deckBoard.length - 1];
     addCard(libraryClass.drawCard(), 10 / 16, zone);
-    exportState();
+    localSaveGame(); 
 });
 
 document.getElementById('token-button').addEventListener('click', function (e) {
@@ -992,7 +992,7 @@ document.getElementById('token-button').addEventListener('click', function (e) {
     let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
     let zone = (emptyHand !== undefined) ? emptyHand : deckBoard[deckBoard.length - 1];
     addCard({ img: mtgCardBack }, 10 / 16, zone);
-    exportState();
+    localSaveGame();
 });
 
 document.getElementById('look-button').addEventListener('click', function (e) {
@@ -1003,7 +1003,7 @@ document.getElementById('look-button').addEventListener('click', function (e) {
     for (const card of deckArr) {
         addCard(card, 10 / 16, zone);
     }
-    exportState();
+    localSaveGame();
 });
 
 document.getElementById('load-state').addEventListener('click', function (e) {
