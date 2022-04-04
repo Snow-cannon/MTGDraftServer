@@ -40,6 +40,43 @@ export async function postState(state) {
 
 }
 
+export async function concedeGame() {
+
+    console.log('sending state');
+
+    let name = '__request';
+    let data = {
+        command: 'game_request',
+        game: {
+            request: 'concede_game',
+            params: {}
+        }
+    };
+
+    let strdat = JSON.stringify(data);
+
+    fetch(name, {
+        method: "post",
+        body: strdat,
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .catch(function (error) {
+        })
+        .then(function (response) {
+            let res = response.json();
+            return res;
+        })
+        .then(function (data) {
+            console.log(data);
+            if(data.ok){
+                
+            } else {
+                console.log('server error');
+            }
+        });
+
+}
+
 export async function getState() {
 
     let name = '__request';
