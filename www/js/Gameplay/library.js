@@ -6,6 +6,7 @@ export class library {
     constructor() {
         this.userDeck = [];
         this.commandZone = [];
+        this.subscribers = [];
         if (JSON.parse(ls.getItem('deckObj') === null)) {
             this.userDeck = [];
         }
@@ -13,9 +14,6 @@ export class library {
             this.userDeck = JSON.parse(ls.getItem('deckObj')).deck;
             this.commandZone = JSON.parse(ls.getItem('deckObj')).commandZone;
         }
-    }
-    drawCard() {
-        return this.userDeck.shift();
     }
     shuffleDeck() {
         // Fisher-Yates shuffle, used for random decoder cipher below    
@@ -38,16 +36,43 @@ export class library {
         for (let i = 0; i < n; i++) {
             newHand[i] = this.userDeck.shift();
         }
+        this.update();
         return newHand;
+    }
+    getLibrary(){
+        return this.userDeck;
+    }
+    setDeck(deck){
+           this.userDeck = deck;
+    }
+    drawCard() {
+        let card = this.userDeck.shift()
+        this.update();
+        return card;
     }
     getLibrarySize(){
         return this.userDeck.length;
     }
     putOnTop(card){
         this.userDeck.unshift(card);
+        this.update();
     }
     putOnBottom(card){
         this.userDeck.push(card);
+        this.update();
+    }
+    subscribe(func){
+        this.subscribers.push(func);
+    }
+    update() {
+        for (const sub of this.subscribers) {
+            try{
+                sub(this.userDeck.length);
+            }
+            catch(e){
+                console.log(e);
+            }
+        }
     }
 }
 

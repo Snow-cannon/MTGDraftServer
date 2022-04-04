@@ -585,6 +585,7 @@ let currentShape;
 let menuNode = document.getElementById('menu');
 let libraryMenuNode = document.getElementById('library-menu');
 let counterMenu = document.getElementById('counter-menu');
+let healthMenu = document.getElementById('health-menu');
 document.getElementById('tap-button').addEventListener('click', () => {
     if (selectArr.includes(currentShape)) {
         for (let card of selectArr) {
@@ -619,7 +620,7 @@ window.addEventListener('click', () => {
     counterMenu.style.display = 'none';
     menuNode.style.display = 'none';
     libraryMenuNode.style.display = 'none';
-
+    healthMenu.style.display = 'none';
 });
 
 document.getElementById('transform-card').addEventListener('click', () => {
@@ -636,6 +637,7 @@ document.getElementById('transform-card').addEventListener('click', () => {
 
 document.getElementById('shuffle-library').addEventListener('click', () => {
     libraryClass.shuffleDeck();
+    localSaveGame();
 });
 
 document.getElementById('flip-card').addEventListener('click', () => {
@@ -836,29 +838,6 @@ function addSelection(cardArr) {
     }
 }
 
-//For now adds a card for each sub-card-zone
-async function initCards() {
-    for (let zone of cardZoneRects) {
-        let response = await fetch("https://api.scryfall.com/cards/random?-is:double-faced+version=png");
-        if (response.ok) {
-            let responseJSON = await response.json();
-            let img;
-            addCard(responseJSON.image_uris.png, 10 / 16);
-        }
-    }
-}
-
-async function initCards2() {
-    for (let zone of cardZoneRects) {
-        let response = await fetch("https://api.scryfall.com/cards/random?-is:double-faced+version=png");
-        if (response.ok) {
-            let responseJSON = await response.json();
-            let img;
-            addCard(responseJSON.image_uris.png, 1);
-            showPopup = false;
-        }
-    }
-}
 
 const ls = window.localStorage;
 
@@ -868,8 +847,9 @@ export function getCardsByParentZone(zoneName) {
 
 let libraryClass;
 window.onload = () => {
-    libraryClass = new library.library()
+    libraryClass = new library.library();
     libraryClass.shuffleDeck();
+    loadLocalSave(libraryClass);
     initGame();
 }
 
@@ -945,7 +925,6 @@ function initGame() {
                 padding: 4,
                 fill: 'green',
             }));
-
             if (i < 2) {
                 label.on('wheel', function (e) {
                     e.evt.preventDefault();
@@ -954,6 +933,36 @@ function initGame() {
                     label.children[1].text(parseInt(label.children[1].text()) + direction);
                     exportState();
                 });
+                label.on('contextmenu', function (e) {
+                    e.evt.preventDefault();
+                    currentShape = e.target;
+                    // show menu
+                    healthMenu.style.display = 'initial';
+                    let containerRect = stage.container().getBoundingClientRect();
+                    let healthMenuRect = healthMenu.getBoundingClientRect();
+                    if (stage.getPointerPosition().x + healthMenuRect.width > containerRect.right) {
+                        healthMenu.style.left =
+                        healthMenuRect.left + stage.getPointerPosition().x - healthMenuRect.width + 4 + 'px';
+                    }
+                    else {
+                        healthMenu.style.left =
+                            containerRect.left + stage.getPointerPosition().x + 4 + 'px';
+                    }
+                    if (stage.getPointerPosition().y + healthMenu.height > containerRect.bottom) {
+                        healthMenu.style.top =
+                            containerRect.top + stage.getPointerPosition().y - healthMenuRect.height + 4 + 'px';
+                    }
+                    else {
+                        healthMenu.style.top =
+                            containerRect.top + stage.getPointerPosition().y + 4 + 'px';
+                    }
+                });
+            }
+            else {
+                label.updateText = (text) => {
+                    label.children[1].text(text);
+                }
+                libraryClass.subscribe(label.updateText);
             }
             bottomLayer.add(label);
         }
@@ -965,11 +974,16 @@ function initGame() {
     imageObj.src = mtgCardBack;
 }
 
+document.getElementById('concede-button').addEventListener('click', function (e) {
+    serverInterface.concedeGame();
+});
+
 document.getElementById('draw-button').addEventListener('click', function (e) {
     let deckBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'hand') return x; });
     let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
     let zone = (emptyHand !== undefined) ? emptyHand : deckBoard[deckBoard.length - 1];
     addCard(libraryClass.drawCard(), 10 / 16, zone);
+    exportState();
 });
 
 document.getElementById('token-button').addEventListener('click', function (e) {
@@ -977,6 +991,7 @@ document.getElementById('token-button').addEventListener('click', function (e) {
     let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
     let zone = (emptyHand !== undefined) ? emptyHand : deckBoard[deckBoard.length - 1];
     addCard({ img: mtgCardBack }, 10 / 16, zone);
+    exportState();
 });
 
 document.getElementById('look-button').addEventListener('click', function (e) {
@@ -987,6 +1002,7 @@ document.getElementById('look-button').addEventListener('click', function (e) {
     for (const card of deckArr) {
         addCard(card, 10 / 16, zone);
     }
+    exportState();
 });
 
 document.getElementById('load-state').addEventListener('click', function (e) {
@@ -1015,8 +1031,46 @@ async function exportState() {
         processedOppDiscBoard.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
     }
     let exportObj = { board: processedBoard, discard: processedDiscBoard, stack: processedStackBoard, oppDisc: processedOppDiscBoard };
+    localSaveGame();
     await serverInterface.postState(JSON.stringify(exportObj));
     console.log("exported");
+}
+
+function localSaveGame(){
+    let exile = cardZoneRects.filter((x) => { if (x.parent_id === 'exile') return x; });
+    let processedExile = [];
+    for (const zone of exile) {
+        processedExile.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
+    }
+    let hand = cardZoneRects.filter((x) => { if (x.parent_id === 'hand') return x; });
+    let processedHand = [];
+    for (const zone of hand) {
+        processedHand.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
+    }
+    let lib = cardZoneRects.filter((x) => { if (x.parent_id === 'library') return x; });
+    let processedLib = [];
+    for (const zone of lib) {
+        processedLib.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
+    }
+    console.log("saved-locally");
+    ls.setItem('currentGame', JSON.stringify({hand:processedHand, libZone: processedLib, exile: processedExile, library:libraryClass.getLibrary()}));
+}
+
+function loadLocalSave(library){
+
+    let localSave = JSON.parse(ls.getItem('currentGame'));
+
+    if(localSave != null){
+        let hand = cardZoneRects.filter((x) => { if (x.parent_id === 'hand') return x; })
+        reloadZoneLocal(hand, localSave.hand);
+        let exile = cardZoneRects.filter((x) => { if (x.parent_id === 'exile') return x; });
+        reloadZoneLocal(exile, localSave.exile);
+        let lib = cardZoneRects.filter((x) => { if (x.parent_id === 'library') return x; });
+        reloadZoneLocal(lib, localSave.libZone);
+        console.log(localSave.libZone);
+        library.setDeck(localSave.library);
+        serverInterface.getState();
+    }
 }
 
 function reloadZone(board, stateboard) {
@@ -1029,6 +1083,24 @@ function reloadZone(board, stateboard) {
         }
         for (let i = 0; i < stateboard[stateboard.length - j - 1].cards.length; ++i) {
             let card = JSON.parse(stateboard[stateboard.length - j - 1].cards[i]);
+            let rotation = (card['attrs']['rotation'] != 90) ? ((card['attrs']['rotation'] == 180) ? 0 : 180) : 90;
+            addCard(card['attrs']['data'], 10 / 16, zone, rotation, card['attrs']['flipBool'], card['attrs']['transformBool'], JSON.parse(card['attrs']['counters']));
+
+        }
+    }
+    relayerCardZones();
+}
+
+function reloadZoneLocal(board, stateboard) {
+    for (let j = 0; j < board.length; ++j) {
+        let zone = board[j];
+        let length = zone.cards.length;
+        for (let i = 0; i < length; ++i) {
+            let card = zone.cards.pop();
+            removeCard(card);
+        }
+        for (let i = 0; i < stateboard[j].cards.length; ++i) {
+            let card = JSON.parse(stateboard[j].cards[i]);
             let rotation = (card['attrs']['rotation'] != 90) ? ((card['attrs']['rotation'] == 180) ? 0 : 180) : 90;
             addCard(card['attrs']['data'], 10 / 16, zone, rotation, card['attrs']['flipBool'], card['attrs']['transformBool'], JSON.parse(card['attrs']['counters']));
 
