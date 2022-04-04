@@ -164,7 +164,14 @@ exports.Game_Logic = class {
             }
         }
 
-        this.sub_tables.push({ u1: id1, u2: id2, data: {}, game_state: PLAYING });
+        this.sub_tables.push({
+            u1: id1,
+            u2: id2,
+            u1Update: {},
+            u2Update: {},
+            // data: {},
+            game_state: PLAYING
+        });
         return { ok: true, table_id: this.sub_tables.length }
     }
 
@@ -211,9 +218,10 @@ exports.Game_Logic = class {
      * @param {Integer} user_id
      */
     make_request(request, data, uobj) {
-        let table;
+        let tableId;
         let user_id;
         let id;
+        let table;
 
         switch (request) {
             case 'update_user_pack':
@@ -300,9 +308,23 @@ exports.Game_Logic = class {
                 this.force_user_reload('reload');
 
             case 'updata_game_state':
-                table = this.get_sub_table_id(uobj);
-                if (table >= 0) {
-                    this.sub_tables[table].data = data.data;
+                // table = this.get_sub_table_id(uobj);
+                // if (table >= 0) {
+                //     this.sub_tables[table].data = data.data;
+                //     this.notify_other_table_participant(uobj, 'get_state');
+                //     return { ok: true };
+                // } else {
+                //     return { ok: false }
+                // }
+
+                tableId = this.get_sub_table_id(uobj);
+                if (tableId >= 0) {
+                    table = this.sub_tables[tableId];
+                    if (table.u1 === this.get_relative_user_id(uobj)) {
+                        table.u1Update = data.data;
+                    } else {
+                        table.u2Update = data.data;
+                    }
                     this.notify_other_table_participant(uobj, 'get_state');
                     return { ok: true };
                 } else {
@@ -310,17 +332,22 @@ exports.Game_Logic = class {
                 }
 
             case 'get_table_state':
-                table = this.get_sub_table_id(uobj);
-                if (table >= 0) {
-                    return { ok: true, data: this.sub_tables[table].data }
+                tableId = this.get_sub_table_id(uobj);
+                if (tableId >= 0) {
+                    table = this.sub_tables[tableId];
+                    if (table.u1 === this.get_relative_user_id(uobj)) {
+                        return { ok: true, data: table.u2Update };
+                    } else {
+                        return { ok: true, data: table.u1Update };
+                    }
                 } else {
                     return { ok: false }
                 }
 
             case 'concede_game':
-                table = this.get_sub_table_id(uobj);
-                if (table >= 0) {
-                    this.sub_tables[table].game_state = PLAY_WAIT;
+                tableId = this.get_sub_table_id(uobj);
+                if (tableId >= 0) {
+                    this.sub_tables[tableId].game_state = PLAY_WAIT;
                     return { ok: true }
                 } else {
                     return { ok: false }
@@ -363,11 +390,11 @@ exports.Game_Logic = class {
             case PLAYING:
                 table = this.get_sub_table_id(uobj);
 
-                if(table > -1){
+                if (table > -1) {
                     state = this.sub_tables[table].game_state;
                 }
 
-                if(state === PLAYING){
+                if (state === PLAYING) {
                     return 'board.html';
                 } else {
                     return 'waiting_room.html';
