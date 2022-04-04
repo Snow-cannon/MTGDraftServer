@@ -169,8 +169,10 @@ exports.Game_Logic = class {
             u2: id2,
             u1Update: {},
             u2Update: {},
+            lastUpdate: -1,
             // data: {},
-            game_state: PLAYING
+            game_state: PLAYING,
+            fin_building: [false, false]
         });
         return { ok: true, table_id: this.sub_tables.length }
     }
@@ -287,11 +289,31 @@ exports.Game_Logic = class {
                 return { ok: true, data: ret_data };
 
             case 'complete_building':
-                this.returned_decks[this.get_relative_user_id(uobj)] = true;
-                if (!this.returned_decks.includes(false)) {
-                    this.prepare_gameplay();
+                if (this.state === BUILDING) {
+                    this.returned_decks[this.get_relative_user_id(uobj)] = true;
+                    if (!this.returned_decks.includes(false)) {
+                        this.prepare_gameplay();
+                    }
+                    return { ok: true };
+                } else if(this.state === PLAYING) {
+                    tableId = this.get_sub_table_id(uobj);
+                    if (tableId >= 0) {
+                        table = this.sub_tables[tableId];
+                        if (table.u1 === this.get_relative_user_id(uobj)) {
+                            table.fin_building[0] = true;
+                        } else {
+                            table.fin_building[1] = true;
+                        }
+                        if(!table.fin_building.includes(false)){
+                            table.game_state = PLAYING;
+                        }
+                        return { ok: true };
+                    } else {
+                        return { ok: false }
+                    }
+                } else {
+                    return { ok: false }
                 }
-                return { ok: true };
 
             case 'get_table_id':
                 user_id = this.get_relative_user_id(uobj);
@@ -322,8 +344,10 @@ exports.Game_Logic = class {
                     table = this.sub_tables[tableId];
                     if (table.u1 === this.get_relative_user_id(uobj)) {
                         table.u1Update = data.data;
+                        table.lastUpdate = 1;
                     } else {
                         table.u2Update = data.data;
+                        table.lastUpdate = 2;
                     }
                     this.notify_other_table_participant(uobj, 'get_state');
                     return { ok: true };
@@ -336,9 +360,9 @@ exports.Game_Logic = class {
                 if (tableId >= 0) {
                     table = this.sub_tables[tableId];
                     if (table.u1 === this.get_relative_user_id(uobj)) {
-                        return { ok: true, data: table.u2Update };
+                        return { ok: true, data: { update: table.lastUpdate === 1 ? table.u1Update : table.u2Update, last: table.lastUpdate === 1 } };
                     } else {
-                        return { ok: true, data: table.u1Update };
+                        return { ok: true, data: { update: table.lastUpdate === 1 ? table.u1Update : table.u2Update, last: table.lastUpdate === 2 } };
                     }
                 } else {
                     return { ok: false }
@@ -348,6 +372,7 @@ exports.Game_Logic = class {
                 tableId = this.get_sub_table_id(uobj);
                 if (tableId >= 0) {
                     this.sub_tables[tableId].game_state = PLAY_WAIT;
+                    this.notify_sub_table(uobj, 'reload');
                     return { ok: true }
                 } else {
                     return { ok: false }
@@ -397,7 +422,7 @@ exports.Game_Logic = class {
                 if (state === PLAYING) {
                     return 'board.html';
                 } else {
-                    return 'waiting_room.html';
+                    return 'deck_builder.html';
                 }
 
             case BUILDING:

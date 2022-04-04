@@ -76,7 +76,7 @@ document.addEventListener('keyup', (event) => {
  * Creats a card from an image url and adds it to layer.
  * @param {String} url 
  */
-function addCard(cardData, cropPercentage) {
+function addCard(cardData, cropPercentage, zone=cardZoneRects[0], callback=fillZonesByColor) {
     let imageObj = new Image();
     let scale = getSmallestZone(cropPercentage);
     imageObj.onload = function () {
@@ -203,9 +203,10 @@ function addCard(cardData, cropPercentage) {
             stage.batchDraw();
         });
         // add the shape to the cardLayer
+        zone.cards.push(card);
         cardLayer.add(card);
         cards.push(card);
-        fillZonesByColor()
+        callback();
     }
     imageObj.src = cardData.img;
 }
@@ -354,6 +355,10 @@ document.getElementById('side-board-button').addEventListener('click', () => {
 });
 
 document.getElementById('sort-zone').addEventListener('click', () => {
+    sortDeckZones();
+});
+
+function sortDeckZones(){
     let deckBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'deck') return x; });
     let deckCards = [];
     for(let i = 0; i < deckBoard.length; ++i){
@@ -370,7 +375,8 @@ document.getElementById('sort-zone').addEventListener('click', () => {
         }
     }
     relayerCardZones();
-});
+}
+
 
 window.addEventListener('click', () => {
     // hide menu
@@ -549,15 +555,39 @@ async function initCards2() {
 const ls = window.localStorage;
 
 function initDeckFromLS() {
-    let userDeck = [];
-    if (JSON.parse(ls.getItem('deck') === null)) {
-        userDeck = [];
+    ls.setItem('currentGame', null);
+    if(JSON.parse(ls.getItem('deckObj')) !== null){
+        let save = JSON.parse(ls.getItem('deckObj'));
+        console.log(save);
+        let deckSave = save.deck;
+        let commandZoneSave = save.commandZone;
+        let sideBoardSave = save.sideBoard;
+        let deckBoard = cardZoneRects.find((x) => { if (x.parent_id === 'deck') return x; });
+        let commandBoard = cardZoneRects.find((x) => { if (x.parent_id === 'specialty-board') return x; });
+        let sideBoardBoard = cardZoneRects.find((x) => { if (x.parent_id === 'side-board') return x; });
+        console.log(deckBoard);
+        for(const card of deckSave){
+            addCard(card, 1, deckBoard, sortDeckZones);
+        }
+        for(const card of commandZoneSave){
+            addCard(card, 1, commandBoard, sortDeckZones);
+        }
+        for(const card of sideBoardSave){
+            addCard(card, 1, sideBoardBoard, sortDeckZones);
+        }
+        relayerCardZones();
     }
-    else {
-        userDeck = JSON.parse(ls.getItem('deck'));
-    }
-    for (const card of userDeck) {
-        addCard(card, 1);
+    else{
+        let userDeck = [];
+        if (JSON.parse(ls.getItem('deck') === null)) {
+            userDeck = [];
+        }
+        else {
+            userDeck = JSON.parse(ls.getItem('deck'));
+        }
+        for (const card of userDeck) {
+            addCard(card, 1);
+        }
     }
     showPopup = false;
 }
@@ -604,19 +634,19 @@ document.getElementById('finished-building').addEventListener('click', function(
     let finishedDeck = getCardsByParentZone('deck').map(a => a.getAttr('data'));
 
     for(let i = 0; i < parseInt(whiteLands.value); ++i){
-        finishedDeck.push({name:"Plains", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/5/f/5fc26aa1-58b9-41b5-95b4-7e9bf2309b54.png?1643664250", back:""});
+        finishedDeck.push({CMC: 0, ame:"Plains", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/5/f/5fc26aa1-58b9-41b5-95b4-7e9bf2309b54.png?1643664250", back:""});
     }
     for(let i = 0; i < parseInt(blueLands.value); ++i){
-        finishedDeck.push({name:"Island", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/9/c/9c0f350d-13ec-4e13-9c4c-1d6bfb9aa0b3.png?1645328292", back:""});
+        finishedDeck.push({CMC: 0, name:"Island", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/9/c/9c0f350d-13ec-4e13-9c4c-1d6bfb9aa0b3.png?1645328292", back:""});
     }
     for(let i = 0; i < parseInt(blackLands.value); ++i){
-        finishedDeck.push({name:"Swamp", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/4/8/48f7492c-67f2-4ba3-848b-7a6a8df7e88b.png?1643664160", back:""});
+        finishedDeck.push({CMC: 0, name:"Swamp", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/4/8/48f7492c-67f2-4ba3-848b-7a6a8df7e88b.png?1643664160", back:""});
     }
     for(let i = 0; i < parseInt(redLands.value); ++i){
-        finishedDeck.push({name:"Mountain", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/9/6/961dcc35-a282-4d40-93b3-1cc7fa5221f5.png?1645328315", back:""});
+        finishedDeck.push({CMC: 0, name:"Mountain", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/9/6/961dcc35-a282-4d40-93b3-1cc7fa5221f5.png?1645328315", back:""});
     }
     for(let i = 0; i < parseInt(greenLands.value); ++i){
-        finishedDeck.push({name:"Forest", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/a/e/aea5c36b-c107-4daf-bedb-507b4cd64724.png?1643664067", back:""});
+        finishedDeck.push({CMC: 0, name:"Forest", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/a/e/aea5c36b-c107-4daf-bedb-507b4cd64724.png?1643664067", back:""});
     }
 
     ls.setItem('deckObj', JSON.stringify({deck:finishedDeck, sideBoard: getCardsByParentZone('side-board').map(a => a.getAttr('data')), commandZone: getCardsByParentZone('specialty-board').map(a => a.getAttr('data'))}));

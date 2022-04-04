@@ -103,7 +103,10 @@ export async function getState() {
         })
         .then(function (data) {
             if (data.ok) {
-                game.importState(data.data);
+                let content = data.data;
+                if(content.update != undefined){
+                    game.importState(content.update, content.last);
+                }
             } else {
                 console.log('fetch state error');
             }
@@ -120,4 +123,8 @@ socket.on('log', function (data) {
 socket.on('get_state', function (data) {
     console.log('getting state');
     getState();
+});
+
+socket.on('reload', function (data) {
+    location.reload();
 });

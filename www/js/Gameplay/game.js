@@ -196,6 +196,7 @@ function addCard(cardData, cropPercentage, zone, rotation = 0, flipBool = false,
             else {
                 pickupCards([card]);
             }
+            exportState();
         });
         //During drag
         card.on('dragmove', (e) => {
@@ -1109,16 +1110,26 @@ function reloadZoneLocal(board, stateboard) {
     relayerCardZones();
 }
 
-export function importState(stateString) {
+export function importState(stateString, fromMe) {
     let state = JSON.parse(stateString);
     let board = cardZoneRects.filter((x) => { if (x.parent_id === 'play-area') return x; })
-    reloadZone(board, state.board);
     let discBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'discard') return x; });
-    reloadZone(discBoard, state.oppDisc);
     let stack = cardZoneRects.filter((x) => { if (x.parent_id === 'stack') return x; });
-    reloadZone(stack, state.stack);
     let oppDisc = cardZoneRects.filter((x) => { if (x.parent_id === 'opp-discard') return x; });
-    reloadZone(oppDisc, state.discard);
+    
+    if(!fromMe){
+        reloadZone(board, state.board);
+        reloadZone(discBoard, state.oppDisc);
+        reloadZone(stack, state.stack);
+        reloadZone(oppDisc, state.discard);
+    }
+    else{
+        reloadZoneLocal(board, state.board);
+        reloadZoneLocal(discBoard, state.oppDisc);
+        reloadZoneLocal(stack, state.stack);
+        reloadZoneLocal(oppDisc, state.discard);
+    }
+
 }
 
 
