@@ -987,6 +987,14 @@ document.getElementById('draw-button').addEventListener('click', function (e) {
     localSaveGame(); 
 });
 
+document.getElementById('draw-flipped-button').addEventListener('click', function (e) {
+    let deckBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'hand') return x; });
+    let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
+    let zone = (emptyHand !== undefined) ? emptyHand : deckBoard[deckBoard.length - 1];
+    addCard(libraryClass.drawCard(), 10 / 16, zone, 0, true);
+    localSaveGame(); 
+});
+
 document.getElementById('token-button').addEventListener('click', function (e) {
     let deckBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'hand') return x; });
     let emptyHand = deckBoard.find((x) => (x.cards.length === 0));
