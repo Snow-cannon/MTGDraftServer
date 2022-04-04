@@ -36,7 +36,7 @@ stage.add(cardLayer);
 stage.add(topLayer);
 
 //All cards are stored as well as all of the currenet selected cards
-let cards = []; 
+let cards = [];
 let selectArr = [];
 let showPopup = true;
 
@@ -49,7 +49,7 @@ let cardZoneRects = [];
 
 //Process the zones and get the rectangles. The object also stores the cards in the rectangles and a referenece to the parent div ID
 for (let zone of cardZones) {
-    cardZoneRects.push({ rect: zone.getBoundingClientRect(), cards: [], parent_id: zone.parentElement.id, id:zone.id });
+    cardZoneRects.push({ rect: zone.getBoundingClientRect(), cards: [], parent_id: zone.parentElement.id, id: zone.id });
 }
 
 //When the window resizes, resize all of the cards to fit(roughly)
@@ -90,7 +90,7 @@ let id = 0;
  * Creats a card from an image url and adds it to layer.
  * @param {String} url 
  */
-function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, transformBool=false, counters=[]) {
+function addCard(cardData, cropPercentage, zone, rotation = 0, flipBool = false, transformBool = false, counters = []) {
     let imageObj = new Image();
     let scale = getSmallestZone(cropPercentage);
     imageObj.onload = function () {
@@ -207,7 +207,7 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
                         c1.x(card.x());
                         c1.y(card.y() + (i - selectArr.indexOf(card)) * yOffset());
                     }
-                    if(c1.rotation() != 90){
+                    if (c1.rotation() != 90) {
                         c1.rotation(0);
                     }
                     relayerCounters(c1);
@@ -322,7 +322,7 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
                 imageObj2.src = card.getAttr('data').img;
                 card.setAttr('flipBool', false);
             }
-            
+
         }
 
         card.add = (counter) => {
@@ -334,23 +334,23 @@ function addCard(cardData, cropPercentage, zone, rotation=0, flipBool=false, tra
             card.getAttr('counters').splice(card.getAttr('counters').indexOf(counter), 1);
             relayerCounters(card);
         }
-        counters.forEach((x) => {addCounter(card, JSON.parse(x)['children'][1]['attrs']['text'])});
+        counters.forEach((x) => { addCounter(card, JSON.parse(x)['children'][1]['attrs']['text']) });
         // add the shape to the cardLayer
         zone.cards.push(card);
         cardLayer.add(card);
         cards.push(card);
         relayerCardZones();
     }
-    if(transformBool && card.getAttr('data').back !== ""){
+    if (transformBool && card.getAttr('data').back !== "") {
         imageObj.src = cardData['back'];
     }
-    if(flipBool){
+    if (flipBool) {
         imageObj.src = mtgCardBack;
     }
-    else{
+    else {
         imageObj.src = cardData['img'];
     }
-    
+
 }
 
 function relayerCounters(card) {
@@ -373,7 +373,7 @@ function removeAllCounters(card) {
     }
 }
 
-function addCounter(card, value=1) {
+function addCounter(card, value = 1) {
     let label = new Konva.Label({
         x: (card.x() - card.offsetX()),
         y: (card.y() - card.offsetY() + yOffset()),
@@ -440,9 +440,6 @@ function addCounter(card, value=1) {
         }
 
     });
-    label.setIndex = () => {
-
-    }
     label.removeAndDestroy = () => {
         card.remove(label);
         label.destroy();
@@ -514,41 +511,45 @@ function pickupCards(cards) {
  */
 function relayerCardZones() {
     for (let zone of cardZoneRects) {
-        let zindex = (zone.id == 'stack') ? 0 : cardLayer.children.length-1;
+        let zindex = (zone.id == 'stack') ? 0 : cardLayer.children.length - 1;
         zone.cards.forEach((a, i) => {
-            if(zone.id == 'opp-zone'){
-                let extraHeight = (zone.cards.length-1) * yOffset() - zone.rect.height + a.height();
-                if(extraHeight <= 0){
+            if (zone.id == 'opp-zone') {
+                let extraHeight = (zone.cards.length - 1) * yOffset() - zone.rect.height + a.height();
+                if (extraHeight <= 0) {
                     a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
                 }
-                else{
+                else {
                     a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset() - extraHeight);
                 }
-                if(a.rotation() != 90){
+                if (a.rotation() != 90) {
                     a.rotation(180);
                 }
             }
-            else if(zone.id == 'neutral-zone'){
+            else if (zone.id == 'neutral-zone') {
                 a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
             }
-            else if(zone.id == 'stack'){
-                a.y(zone.rect.y  - stageTop() + a.height() / 2 + i * yOffset());
+            else if (zone.id == 'stack') {
+                a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
                 a.rotation(0);
             }
-            else{
-                a.y(zone.rect.y  + zone.rect.height- stageTop() - a.height() / 2 - i * yOffset());
-                if(a.rotation() != 90){
+            else if (zone.id == 'discard-zone') {
+                a.y(zone.rect.y - stageTop() + a.height() / 2 + i * yOffset());
+                a.rotation(0);
+            }
+            else {
+                a.y(zone.rect.y + zone.rect.height - stageTop() - a.height() / 2 - i * yOffset());
+                if (a.rotation() != 90) {
                     a.rotation(0);
                 }
             }
-            a.x(zone.rect.x + (zone.rect.width - a.width() )/2  + a.width() / 2);
+            a.x(zone.rect.x + (zone.rect.width - a.width()) / 2 + a.width() / 2);
             a.setZIndex(zindex);
             relayerCounters(a);
-            if(zone.id == 'stack' && a.getAttr('counters').length > 0){
+            if (zone.id == 'stack' && a.getAttr('counters').length > 0) {
                 zindex += a.getAttr('counters').length + 1;
             }
-            else if(zone.id == 'stack'){
-                zindex ++;
+            else if (zone.id == 'stack') {
+                zindex++;
             }
             else if (a.getAttr('counters').length > 0) {
                 zindex -= a.getAttr('counters').length + 1;
@@ -808,8 +809,8 @@ function hitCheck(shape1, card) {
     // corners of shape 2
     let X1 = s2.x;
     let A1 = s2.x + s2.width;
-    let Y1 = (card.rotation() == 180)? s2.y + s2.height : s2.y;
-    let B1 = (card.rotation() == 180)? s2.y + s2.height - yOffset() : s2.y + yOffset(); //This checks if the rect covers the space near the top of the card specifically
+    let Y1 = (card.rotation() == 180) ? s2.y + s2.height : s2.y;
+    let B1 = (card.rotation() == 180) ? s2.y + s2.height - yOffset() : s2.y + yOffset(); //This checks if the rect covers the space near the top of the card specifically
     // Simple overlapping rect collision test
     if (A < X1 || A1 < X || B < Y1 || B1 < Y) {
         return false
@@ -890,7 +891,7 @@ function initGame() {
             stroke: '#00FFFF',
             strokeWidth: 0,
         });
-        libraryImg.x(libDiv.x + (libDiv.width - libraryImg.width()) / 2)
+        libraryImg.x(libDiv.x + (libDiv.width - libraryImg.width()))
         libraryImg.y(libDiv.y + (libDiv.height - libraryImg.height()) / 2)
         libraryImg.on('contextmenu', function (e) {
             e.evt.preventDefault();
@@ -910,6 +911,51 @@ function initGame() {
             libraryImg.x(libDiv.x + (libDiv.width - libraryImg.width()) / 2);
             libraryImg.y(libDiv.y + (libDiv.height - libraryImg.height()) / 2);
             libraryImg.setZIndex(0);
+        }
+
+        let deckUpdate = new library.observer();
+
+        let valueArr = [20, 20, libraryClass.getLibrarySize()]
+        for (let i = 0; i < 3; ++i) {
+
+            let label = new Konva.Label({
+                x: 0,
+                y: libDiv.y + yOffset() * i,
+                draggable: false,
+            });
+
+            // add a tag to the label
+            label.add(new Konva.Tag({
+                fill: '#bbb',
+                stroke: '#333',
+                shadowColor: 'black',
+                shadowBlur: 10,
+                shadowOffset: [10, 10],
+                shadowOpacity: 0.2,
+                lineJoin: 'round',
+                cornerRadius: 5,
+                index: 0,
+            }));
+
+            // add text to the label
+            label.add(new Konva.Text({
+                text: valueArr[i],
+                fontSize: 20,
+                lineHeight: 1.2,
+                padding: 4,
+                fill: 'green',
+            }));
+
+            if (i < 2) {
+                label.on('wheel', function (e) {
+                    e.evt.preventDefault();
+                    let pointer = stage.getPointerPosition();
+                    let direction = e.evt.deltaY > 0 ? -1 : 1;
+                    label.children[1].text(parseInt(label.children[1].text()) + direction);
+                    exportState();
+                });
+            }
+            bottomLayer.add(label);
         }
 
         resizeClosure.subscribe(libraryResize);
@@ -950,30 +996,30 @@ document.getElementById('load-state').addEventListener('click', function (e) {
 async function exportState() {
     let board = cardZoneRects.filter((x) => { if (x.parent_id === 'play-area') return x; });
     let processedBoard = [];
-    for(const zone of board){
-        processedBoard.push({cards: zone.cards.map((a) => {let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b;})});
+    for (const zone of board) {
+        processedBoard.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
     }
     let discBoard = cardZoneRects.filter((x) => { if (x.parent_id === 'discard') return x; });
     let processedDiscBoard = [];
-    for(const zone of discBoard){
-        processedDiscBoard.push({cards: zone.cards.map((a) => {let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b;})});
+    for (const zone of discBoard) {
+        processedDiscBoard.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
     }
     let stack = cardZoneRects.filter((x) => { if (x.parent_id === 'stack') return x; });
     let processedStackBoard = [];
-    for(const zone of stack){
-        processedStackBoard.push({cards: zone.cards.map((a) => {let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b;})});
+    for (const zone of stack) {
+        processedStackBoard.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
     }
     let oppDisc = cardZoneRects.filter((x) => { if (x.parent_id === 'opp-discard') return x; });
     let processedOppDiscBoard = [];
-    for(const zone of oppDisc){
-        processedOppDiscBoard.push({cards: zone.cards.map((a) => {let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b;})});
+    for (const zone of oppDisc) {
+        processedOppDiscBoard.push({ cards: zone.cards.map((a) => { let b = a.clone(); b.setAttr('counters', JSON.stringify(b.getAttr('counters'))); return b; }) });
     }
     let exportObj = { board: processedBoard, discard: processedDiscBoard, stack: processedStackBoard, oppDisc: processedOppDiscBoard };
     await serverInterface.postState(JSON.stringify(exportObj));
     console.log("exported");
 }
 
-function reloadZone(board, stateboard){
+function reloadZone(board, stateboard) {
     for (let j = 0; j < board.length; ++j) {
         let zone = board[j];
         let length = zone.cards.length;
@@ -981,9 +1027,9 @@ function reloadZone(board, stateboard){
             let card = zone.cards.pop();
             removeCard(card);
         }
-        for (let i = 0; i < stateboard[stateboard.length - j -1].cards.length; ++i) {
-            let card = JSON.parse(stateboard[stateboard.length - j -1].cards[i]);
-            let rotation = (card['attrs']['rotation'] != 90)? ((card['attrs']['rotation'] ==180)? 0 : 180) : 90; 
+        for (let i = 0; i < stateboard[stateboard.length - j - 1].cards.length; ++i) {
+            let card = JSON.parse(stateboard[stateboard.length - j - 1].cards[i]);
+            let rotation = (card['attrs']['rotation'] != 90) ? ((card['attrs']['rotation'] == 180) ? 0 : 180) : 90;
             addCard(card['attrs']['data'], 10 / 16, zone, rotation, card['attrs']['flipBool'], card['attrs']['transformBool'], JSON.parse(card['attrs']['counters']));
 
         }
