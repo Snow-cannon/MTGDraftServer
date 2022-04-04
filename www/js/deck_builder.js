@@ -634,7 +634,7 @@ document.getElementById('finished-building').addEventListener('click', function(
     let finishedDeck = getCardsByParentZone('deck').map(a => a.getAttr('data'));
 
     for(let i = 0; i < parseInt(whiteLands.value); ++i){
-        finishedDeck.push({CMC: 0, ame:"Plains", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/5/f/5fc26aa1-58b9-41b5-95b4-7e9bf2309b54.png?1643664250", back:""});
+        finishedDeck.push({CMC: 0, name:"Plains", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/5/f/5fc26aa1-58b9-41b5-95b4-7e9bf2309b54.png?1643664250", back:""});
     }
     for(let i = 0; i < parseInt(blueLands.value); ++i){
         finishedDeck.push({CMC: 0, name:"Island", img: "https://c1.scryfall.com/file/scryfall-cards/png/front/9/c/9c0f350d-13ec-4e13-9c4c-1d6bfb9aa0b3.png?1645328292", back:""});
