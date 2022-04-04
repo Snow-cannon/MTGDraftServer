@@ -147,12 +147,12 @@ app.get('/', (req, res) => {
                 req.session.table_id = table_id;
 
                 //Get the user and table object associated with the request
-                uobj = users.get_user(user_id);
+                let uobj = users.get_user(user_id);
     
                 //Check if user exists
                 if (uobj !== undefined) {
-                    
-                    tobj = uobj.get_table();
+
+                    let tobj = uobj.get_table();
     
                     //Check if table exists
                     if (tobj !== undefined) {
