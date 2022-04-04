@@ -146,7 +146,24 @@ app.get('/', (req, res) => {
                 req.session.user_id = user_id;
                 req.session.table_id = table_id;
 
-                pp = path.join(www_root(), 'html', tables.get_table(table_id).game_state.get_game_html());
+                //Get the user and table object associated with the request
+                uobj = users.get_user(user_id);
+    
+                //Check if user exists
+                if (uobj !== undefined) {
+                    
+                    tobj = uobj.get_table();
+    
+                    //Check if table exists
+                    if (tobj !== undefined) {
+
+                        pp = path.join(www_root(), 'html', tables.get_table(table_id).game_state.get_game_html(uobj));
+                        
+                    }
+
+                } //If there is no user, table, valid input data, or valid return request, say it is an invalid post request
+
+                
             }
         }
     }

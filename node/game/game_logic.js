@@ -164,7 +164,7 @@ exports.Game_Logic = class {
             }
         }
 
-        this.sub_tables.push({ u1: id1, u2: id2, data: {} });
+        this.sub_tables.push({ u1: id1, u2: id2, data: {}, game_state: PLAYING });
         return { ok: true, table_id: this.sub_tables.length }
     }
 
@@ -317,6 +317,15 @@ exports.Game_Logic = class {
                     return { ok: false }
                 }
 
+            case 'concede_game':
+                table = this.get_sub_table_id(uobj);
+                if (table >= 0) {
+                    this.sub_tables[table].game_state = PLAY_WAIT;
+                    return { ok: true }
+                } else {
+                    return { ok: false }
+                }
+
             default:
                 log_in('Make_request', 'Default', 'game request made: no request detected', { data: data });
                 return { ok: false };
@@ -340,8 +349,11 @@ exports.Game_Logic = class {
 
 
 
-    get_game_html() {
+    get_game_html(uobj) {
+        let table;
+        let state;
         switch (this.state) {
+
             case DRAFTING:
                 return 'draft_room.html';
 
@@ -349,7 +361,17 @@ exports.Game_Logic = class {
                 return 'pre_play_room.html';
 
             case PLAYING:
-                return 'board.html';
+                table = this.get_sub_table_id(uobj);
+
+                if(table > -1){
+                    state = this.sub_tables[table].game_state;
+                }
+
+                if(state === PLAYING){
+                    return 'board.html';
+                } else {
+                    return 'waiting_room.html';
+                }
 
             case BUILDING:
                 return 'deck_builder.html';
